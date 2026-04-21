@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Manage Orders</h2>
+
+<table>
+    <tr>
+        <th>ID</th><th>User</th><th>Status</th><th>Pickup</th><th>Created</th><th>Actions</th>
+    </tr>
+    {% for o in orders %}
+    <tr>
+        <td>{{ o[0] }}</td>
+        <td>{{ o[1] }} {{ o[2] }}</td>
+        <td>{{ o[3] }}</td>
+        <td>{{ o[4] }}</td>
+        <td>{{ o[5] }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o[0]) }}">
+                <select name="status">
+                    <option value="approved">Approve</option>
+                    <option value="declined">Decline</option>
+                    <option value="shipped">Shipped</option>
+                </select>
+                <button type="submit">Update</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

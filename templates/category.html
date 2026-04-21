@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ category.title() }}</h2>
+
+<div class="product-grid">
+    {% for p in products %}
+    <div class="product-card">
+        {% if p[5] %}
+            <img src="{{ p[5] }}" alt="{{ p[1] }}">
+        {% endif %}
+        <h3>{{ p[1] }}</h3>
+        <p>{{ p[2] }}</p>
+        <p class="price">${{ "%.2f"|format(p[3]) }}</p>
+        <p>In stock: {{ p[4] }}</p>
+        {% if p[4] > 0 %}
+        <form method="POST" action="{{ url_for('add_to_cart', product_id=p[0]) }}">
+            <label>Qty</label>
+            <input type="number" name="quantity" value="1" min="1" max="{{ p[4] }}">
+            <button type="submit">Add to Cart</button>
+        </form>
+        {% else %}
+        <p class="out-of-stock">Out of stock</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

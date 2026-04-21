@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Checkout</h2>
+<form method="POST">
+    <label>Pickup or Delivery?</label>
+    <select name="pickup_option">
+        <option value="delivery">Delivery</option>
+        <option value="pickup">Pickup in store</option>
+    </select>
+
+    <!-- Payment form could be expanded later -->
+    <p>Payment details (mock):</p>
+    <input type="text" placeholder="Card Number">
+    <input type="text" placeholder="Expiration">
+    <input type="text" placeholder="CVV">
+
+    <button type="submit">Place Order</button>
+</form>
+{% endblock %}

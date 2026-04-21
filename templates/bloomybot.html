@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>BloomyBot</h2>
+<div id="bloomybot-container">
+    <div id="bloomybot-messages"></div>
+    <form id="bloomybot-form">
+        <input type="text" id="bloomybot-input" placeholder="Ask BloomyBot about your order or plants...">
+        <button type="submit">Send</button>
+    </form>
+</div>
+<script src="{{ url_for('static', filename='js/bloomybot.js') }}"></script>
+{% endblock %}

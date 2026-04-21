@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome, {{ user[1] }}!</h1>
+<p>Select a category to start growing your garden.</p>
+
+<div class="category-grid">
+    {% for cat in categories %}
+    <a href="{{ url_for('category_page', category_name=cat) }}" class="category-card">
+        <h3>{{ cat.title() }}</h3>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

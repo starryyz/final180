@@ -1,0 +1,50 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blooming Seeds</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="{{ url_for('dashboard') }}" class="nav-link">Home</a>
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('cart') }}" class="nav-link">
+                Cart
+                {% set cart = session.get('cart', {}) %}
+                {% if cart %}
+                    <span class="cart-count">
+                        {{ cart|map('int')|list|length if false else cart|length }}
+                    </span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('bloomybot') }}" class="nav-link">BloomyBot</a>
+        {% endif %}
+    </div>
+    <div class="nav-right">
+        <span class="site-name">Blooming Seeds</span>
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>
