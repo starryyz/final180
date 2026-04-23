@@ -1,16 +1,30 @@
 # app.py
 from flask import Flask, render_template, redirect, url_for, request, session, flash
-from flask_mysqldb import MySQL
+import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-mysql = MySQL(app)
+# ---------- Helpers ----------
+
+def get_db_connection():
+    return pymysql.connect(
+        host=Config.MYSQL_HOST,
+        user=Config.MYSQL_USER,
+        password=Config.MYSQL_PASSWORD,
+        database=Config.MYSQL_DATABASE,
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
 def get_db_cursor():
-    return mysql.connection.cursor()
+    conn = get_db_connection()
+    return conn.cursor()
+
+def get_db_connection_for_commit():
+    conn = get_db_connection()
+    return conn
 
 def current_user():
     if "user_id" not in session:
@@ -67,20 +81,22 @@ def signup():
 
         password_hash = generate_password_hash(password)
 
-        cur = get_db_cursor()
+        conn = get_db_connection()
+        cur = conn.cursor()
         try:
             cur.execute("""
                 INSERT INTO users (first_name, last_name, email, phone, address, password_hash)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (first_name, last_name, email, phone, address, password_hash))
-            mysql.connection.commit()
+            conn.commit()
             flash("Account created! Please log in.", "success")
             return redirect(url_for("login"))
         except Exception as e:
-            mysql.connection.rollback()
+            conn.rollback()
             flash("Error creating account. Maybe email already exists.", "danger")
         finally:
             cur.close()
+            conn.close()
 
     return render_template("signup.html")
 
@@ -215,15 +231,34 @@ def checkout():
 
                 cur.execute("UPDATE products SET stock = stock - %s WHERE id = %s", (qty, pid))
 
-            mysql.connection.commit()
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO orders (user_id, status, pickup_option)
+                VALUES (%s, 'pending', %s)
+            """, (user[0], pickup_option))
+            order_id = cur.lastrowid
+
+            for pid, qty in cart.items():
+                cur.execute("SELECT price FROM products WHERE id = %s", (pid,))
+                price = cur.fetchone()[0]
+                cur.execute("""
+                    INSERT INTO order_items (order_id, product_id, quantity, price_each)
+                    VALUES (%s, %s, %s, %s)
+                """, (order_id, pid, qty, price))
+
+                cur.execute("UPDATE products SET stock = stock - %s WHERE id = %s", (qty, pid))
+
+            conn.commit()
             session["cart"] = {}
-            flash("Order placed! You’ll be notified when it’s approved or shipped.", "success")
+            flash("Order placed! You'll be notified when it's approved or shipped.", "success")
             return redirect(url_for("dashboard"))
         except Exception as e:
-            mysql.connection.rollback()
+            conn.rollback()
             flash("Error placing order.", "danger")
         finally:
             cur.close()
+            conn.close()
 
     return render_template("checkout.html", user=user)
 
@@ -268,16 +303,18 @@ def admin_update_order_status(order_id):
 
     new_status = request.form["status"]
 
-    cur = get_db_cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     try:
         cur.execute("UPDATE orders SET status = %s WHERE id = %s", (new_status, order_id))
-        mysql.connection.commit()
+        conn.commit()
         flash(f"Order {order_id} updated to {new_status}.", "success")
     except:
-        mysql.connection.rollback()
+        conn.rollback()
         flash("Error updating order.", "danger")
     finally:
         cur.close()
+        conn.close()
 
     return redirect(url_for("admin_orders"))
 
@@ -310,14 +347,16 @@ def profile():
         address = request.form.get("address")
 
         # Update user info
-        cur = get_db_cursor()
+        conn = get_db_connection()
+        cur = conn.cursor()
         cur.execute("""
             UPDATE users
             SET first_name=%s, last_name=%s, phone=%s, address=%s
             WHERE id=%s
         """, (first_name, last_name, phone, address, user[0]))
-        mysql.connection.commit()
+        conn.commit()
         cur.close()
+        conn.close()
 
         # Update session name if changed
         session["user_name"] = first_name
@@ -330,10 +369,12 @@ def profile():
                 filepath = os.path.join(PROFILE_FOLDER, filename)
                 file.save(filepath)
 
-                cur = get_db_cursor()
+                conn = get_db_connection()
+                cur = conn.cursor()
                 cur.execute("UPDATE users SET profile_pic=%s WHERE id=%s", (filename, user[0]))
-                mysql.connection.commit()
+                conn.commit()
                 cur.close()
+                conn.close()
 
                 session["profile_pic"] = url_for("static", filename=f"profile_pics/{filename}")
 
