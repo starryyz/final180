@@ -9,8 +9,6 @@ app.config.from_object(Config)
 
 mysql = MySQL(app)
 
-# ---------- Helpers ----------
-
 def get_db_cursor():
     return mysql.connection.cursor()
 
@@ -40,19 +38,22 @@ def login():
         password = request.form["password"]
 
         cur = get_db_cursor()
-        cur.execute("SELECT id, password_hash, is_admin FROM users WHERE email = %s", (email,))
+        cur.execute("SELECT id, first_name, password_hash, is_admin FROM users WHERE email = %s", (email,))
         user = cur.fetchone()
         cur.close()
 
-        if user and check_password_hash(user[1], password):
+        if user and check_password_hash(user[2], password):
             session["user_id"] = user[0]
-            if user[2] == 1:
+            session["user_name"] = user[1]
+
+            if user[3] == 1:
                 return redirect(url_for("admin_dashboard"))
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid credentials", "danger")
 
     return render_template("login.html")
+
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -92,11 +93,11 @@ def logout():
 
 CATEGORIES = [
     "seeds",
-    "pots",
-    "pre-potted plants",
     "succulents",
-    "gardening tools",
+    "pre-potted plants",
     "soil",
+    "gardening tools",
+    "pots",
     "watering cans"
 ]
 
@@ -112,15 +113,26 @@ def category_page(category_name):
     user = current_user()
     if not user:
         return redirect(url_for("login"))
+
     if category_name not in CATEGORIES:
         return redirect(url_for("dashboard"))
 
     cur = get_db_cursor()
-    cur.execute("SELECT id, name, description, price, stock, image_url FROM products WHERE category = %s", (category_name,))
+    cur.execute("""
+        SELECT id, name, description, price, stock, image_url 
+        FROM products 
+        WHERE category = %s
+    """, (category_name,))
     products = cur.fetchall()
     cur.close()
 
-    return render_template("category.html", user=user, category=category_name, products=products)
+    return render_template(
+        "category.html",
+        user=user,
+        category_name=category_name,
+        categories=CATEGORIES,
+        products=products
+    )
 
 # ---------- Cart & checkout ----------
 
@@ -187,14 +199,12 @@ def checkout():
 
         cur = get_db_cursor()
         try:
-            # Create order
             cur.execute("""
                 INSERT INTO orders (user_id, status, pickup_option)
                 VALUES (%s, 'pending', %s)
             """, (user[0], pickup_option))
             order_id = cur.lastrowid
 
-            # Add items
             for pid, qty in cart.items():
                 cur.execute("SELECT price FROM products WHERE id = %s", (pid,))
                 price = cur.fetchone()[0]
@@ -203,7 +213,6 @@ def checkout():
                     VALUES (%s, %s, %s, %s)
                 """, (order_id, pid, qty, price))
 
-                # Decrease stock
                 cur.execute("UPDATE products SET stock = stock - %s WHERE id = %s", (qty, pid))
 
             mysql.connection.commit()
@@ -257,7 +266,7 @@ def admin_update_order_status(order_id):
     if not is_admin():
         return redirect(url_for("login"))
 
-    new_status = request.form["status"]  # 'approved', 'declined', 'shipped'
+    new_status = request.form["status"]
 
     cur = get_db_cursor()
     try:
@@ -279,6 +288,80 @@ def bloomybot():
     user = current_user()
     return render_template("bloomybot.html", user=user)
 
+
+# ---------- User Profile ----------
+
+import os
+from werkzeug.utils import secure_filename
+
+PROFILE_FOLDER = "static/profile_pics"
+os.makedirs(PROFILE_FOLDER, exist_ok=True)
+
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        phone = request.form.get("phone")
+        address = request.form.get("address")
+
+        # Update user info
+        cur = get_db_cursor()
+        cur.execute("""
+            UPDATE users
+            SET first_name=%s, last_name=%s, phone=%s, address=%s
+            WHERE id=%s
+        """, (first_name, last_name, phone, address, user[0]))
+        mysql.connection.commit()
+        cur.close()
+
+        # Update session name if changed
+        session["user_name"] = first_name
+
+        # Handle profile picture upload
+        if "profile_pic" in request.files:
+            file = request.files["profile_pic"]
+            if file and file.filename != "":
+                filename = secure_filename(f"user_{user[0]}.png")
+                filepath = os.path.join(PROFILE_FOLDER, filename)
+                file.save(filepath)
+
+                cur = get_db_cursor()
+                cur.execute("UPDATE users SET profile_pic=%s WHERE id=%s", (filename, user[0]))
+                mysql.connection.commit()
+                cur.close()
+
+                session["profile_pic"] = url_for("static", filename=f"profile_pics/{filename}")
+
+        flash("Profile updated successfully!", "success")
+
+        # ⭐ Reload updated user info
+        cur = get_db_cursor()
+        cur.execute("SELECT id, first_name, last_name, email, phone, address, profile_pic FROM users WHERE id=%s", (user[0],))
+        updated_user = cur.fetchone()
+        cur.close()
+
+        return render_template("profile.html", user=updated_user)
+
+    # GET request — load profile picture
+    cur = get_db_cursor()
+    cur.execute("SELECT profile_pic FROM users WHERE id=%s", (user[0],))
+    pic = cur.fetchone()[0]
+    cur.close()
+
+    if pic:
+        session["profile_pic"] = url_for("static", filename=f"profile_pics/{pic}")
+    else:
+        session["profile_pic"] = url_for("static", filename="images/default-profile.png")
+
+    return render_template("profile.html", user=user)
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+
 

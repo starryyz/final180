@@ -1,0 +1,802 @@
+/* ---------------------------------------------------
+   GLOBAL BACKGROUND — warm beige luxury
+--------------------------------------------------- */
+body {
+    background: linear-gradient(180deg, #F4EDE4, #F8F5F0);
+    font-family: "Inter", sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #4A3F35;
+}
+
+/* ---------------------------------------------------
+ NAV BAR — logo + brand on LEFT
+--------------------------------------------------- */
+.lux-nav {
+    width: 100%;
+    background: #F4EDE4;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: flex-start;   /* keeps items aligned left */
+    align-items: center;
+    border-bottom: 1px solid rgba(74, 63, 53, 0.15);
+    box-sizing: border-box;
+}
+.lux-nav-link {
+    margin-left: 20px;
+    color: #4A3F35;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 10px;
+    transition: 0.25s ease;
+}
+
+.lux-nav-link:hover {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.nav-username {
+    margin-right: 15px;
+    font-weight: 600;
+    color: #4A3F35;
+}
+
+.nav-left {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.nav-right {
+    margin-left: auto;      /* pushes logout to the right */
+    padding-left: 40px;     /* space between brand + logout */
+    padding-right: 32px;    /* space from right edge */
+    display: flex;
+    align-items: center;
+}
+
+.lux-logo {
+    height: 42px;
+    width: auto;
+}
+
+.lux-brand {
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: #4A3F35;
+    letter-spacing: 0.4px;
+}
+
+.nav-right a {
+    background: #D7C49E; /* champagne gold */
+    padding: 9px 18px;
+    border-radius: 8px;
+    color: #4A3F35;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.nav-right a:hover {
+    background: #CBB68F;
+}
+/* 🌼 Animated Daisy Divider */
+.daisy-divider {
+    width: 100%;
+    height: 22px; /* adjust height */
+    background-color: #0d77161f; /* same soft green */
+    background-image: url('/static/images/daisy-strip.png');
+    background-repeat: repeat-x;
+    background-size: 120px auto; /* size of each daisy cluster */
+    animation: slide-daisies 12s linear infinite;
+    margin: 20px 0 30px 0;
+    border-radius: 8px;
+}
+
+@keyframes slide-daisies {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -300px 0;
+    }
+}
+
+.gallery-section {
+    margin-top: 50px;
+    padding: 32px;
+    border-radius: 28px;
+
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 0 40px rgba(255, 255, 255, 0.25);
+}
+
+.gallery-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #4A3F35;
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 18px;
+}
+
+.gallery-grid img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.gallery-grid img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* PROFILE PAGE — elegant user info panel */
+.profile-btn {
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.profile-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #d8c3a5; /* luxury beige border */
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.profile-img:hover {
+    transform: scale(1.08);
+}
+.profile-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+}
+
+.profile-title {
+    text-align: center;
+    color: #4A3F35;
+    margin-bottom: 20px;
+}
+
+.profile-pic-wrapper {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-page-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #d8c3a5;
+    margin-bottom: 10px;
+}
+
+.profile-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #c9b8a6;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 12px;
+    background: #d8c3a5;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.logout-wrapper {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.logout-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #c97f7f; /* soft muted rose */
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.25s ease;
+}
+
+.logout-btn:hover {
+    background: #b96c6c;
+    transform: translateY(-2px);
+}
+
+/* PLANT DESCRIPTION CARDS */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+}
+
+.item-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow:
+        0 6px 20px rgba(0,0,0,0.08),
+        inset 0 0 20px rgba(255,255,255,0.15);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.item-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 10px 28px rgba(0,0,0,0.12),
+        inset 0 0 25px rgba(255,255,255,0.2);
+}
+
+.item-image {
+    width: 100%;
+    height: 150px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    background-size: cover;
+    background-position: center;
+}
+
+.placeholder {
+    background: linear-gradient(135deg, #e8dfd6 0%, #d9cec3 100%);
+    opacity: 0.6;
+}
+
+.item-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4A3F35;
+    margin-bottom: 8px;
+}
+
+.item-desc {
+    font-size: 0.95rem;
+    color: #6b5e53;
+}
+
+/* MISSION STATEMENT SECTION */
+.story-section {
+    margin-top: 50px;
+    padding: 32px;
+    border-radius: 28px;
+
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 0 40px rgba(255, 255, 255, 0.25);
+}
+
+.story-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #4A3F35;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.story-text {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #4A3F35;
+    text-align: center;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+
+/* 🌸 GLASS PANEL FOR MAP SECTION */
+.map-section {
+    margin-top: 50px;
+    padding: 32px;
+    border-radius: 28px;
+
+    /* frosted glass */
+    background: #0d77161f;
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+
+    /* soft warm border */
+    border: 1px solid rgba(255, 255, 255, 0.28);
+
+    /* luxury shadow */
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        inset 0 0 40px rgba(255, 255, 255, 0.25);
+}
+
+/* 🌿 MAP TITLE */
+.map-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #4A3F35;
+    text-align: center;
+    margin-bottom: 22px;
+    letter-spacing: 0.5px;
+}
+
+/* 🌼 MAP CONTAINER */
+.map-container {
+    width: 100%;
+    height: 360px;
+    border-radius: 20px;
+    overflow: hidden;
+
+    /* subtle border + glow */
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.06),
+        inset 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+/* 🌺 LEAFLET MAP TINT (warm beige overlay) */
+.leaflet-container {
+    background: rgba(244, 237, 228, 0.35) !important;
+}
+
+/* Optional: soften map controls */
+.leaflet-control-zoom a {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(6px);
+    border-radius: 8px !important;
+    color: #4A3F35 !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: rgba(255, 255, 255, 0.85) !important;
+}
+
+
+/* ---------------------------------------------------
+   CATEGORY MENU — soft blush bar
+--------------------------------------------------- */
+.top-menu {
+    width: 100%;
+  background: #0d77161f;
+    padding: 14px 32px;
+    display: flex;
+    flex-wrap: wrap;   /* <-- THIS FIXES THE CUT-OFF */
+    gap: 20px;
+    align-items: center;
+    box-sizing: border-box; /* prevents overflow from padding */
+}
+
+
+.menu-link {
+    color: #4A3F35;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1.05rem;
+    transition: 0.2s ease;
+}
+
+.menu-link:hover {
+    color: #7A5C58; /* deeper blush-brown */
+}
+
+
+
+/* ---------------------------------------------------
+   CATEGORY TITLE
+--------------------------------------------------- */
+.category-title {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 2rem;
+    color: #4A3F35;
+    font-weight: 600;
+}
+
+
+
+/* ---------------------------------------------------
+   ITEM CARDS — boutique product grid
+--------------------------------------------------- */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 32px;
+    padding: 40px 20px; /* reduced left/right padding */
+    box-sizing: border-box;
+}
+
+
+.item-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    transition: 0.25s ease;
+    border: 1px solid rgba(74, 63, 53, 0.12);
+}
+
+.item-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: contain;
+    margin-bottom: 14px;
+}
+
+.item-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.10);
+}
+
+
+
+/* ---------------------------------------------------
+   AUTH PAGE — kept your original vibe but recolored
+--------------------------------------------------- */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.auth-card {
+    width: 430px;
+    background: #ffffff;
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.08);
+    border: 1px solid rgba(74, 63, 53, 0.12);
+}
+
+.auth-title {
+    text-align: center;
+    color: #4A3F35;
+    margin-bottom: 28px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    font-size: 14px;
+    color: #4A3F35;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.input-group input {
+    padding: 13px;
+    border-radius: 10px;
+    border: 1px solid rgba(74, 63, 53, 0.25);
+    font-size: 15px;
+    outline: none;
+    background: #F8F5F0;
+    transition: 0.25s ease;
+    background-image: url(/static/images/flower.png);
+    background-repeat: no-repeat;
+    background-position: 12px center;
+    background-size: 18px;
+    padding-left: 40px;
+}
+
+.input-group input:focus {
+    border-color: #D7C49E;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(215, 196, 158, 0.35);
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 13px;
+    background: #D7C49E;
+    color: #4A3F35;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.auth-btn:hover {
+    background: #CBB68F;
+    transform: translateY(-1px);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 14px;
+    color: #4A3F35;
+}
+
+.auth-switch a {
+    color: #7A5C58;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* ---------------------------------------------------
+   CATEGORY SLIDER — luxury boutique style
+--------------------------------------------------- */
+
+.category-slider-container {
+    position: relative;
+    width: 100%;
+    padding: 40px 0;
+
+    /* GLASS EFFECT */
+    background: rgba(255, 255, 255, 0.25); /* soft white tint */
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+
+
+
+
+.category-slider {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.4s ease;
+    will-change: transform;
+}
+
+
+.slide {
+    min-width: 280px;
+    height: 180px;
+    background: #F4EDE4;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border: 1px solid rgba(74, 63, 53, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.slide h2 {
+    color: #4A3F35;
+    margin-bottom: 14px;
+    font-size: 1.4rem;
+}
+
+.browse-btn {
+    background: #D7C49E;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #4A3F35;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.browse-btn:hover {
+    background: #CBB68F;
+}
+
+.slider-arrow {
+    background: #D7C49E;
+    border: none;
+    color: #4A3F35;
+    font-size: 2rem;
+    padding: 10px 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.slider-arrow {
+    position: absolute;
+    background: #D7C49E;
+    border: none;
+    color: #4A3F35;
+    font-size: 2rem;
+    padding: 10px 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.25s ease;
+    z-index: 10;
+}
+
+.left-arrow {
+    margin-right: 10px;
+    top: auto;     
+    left: 20px;
+    bottom: 20px;  
+    transform: none; /* position at bottom left */
+}
+
+.right-arrow {
+    right: 20px;
+    bottom: 20px;
+    top: auto;                
+    transform: none;           
+}
+/* Netflix-style active slide scaling */
+.slide {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.slide.active {
+    transform: scale(1.08);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    z-index: 5;
+}
+
+/* 🌿 LUXURY FOOTER */
+.lux-footer {
+    margin-top: 60px;
+    padding: 30px 20px;
+    text-align: center;
+
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    border-radius: 20px 20px 0 0;
+}
+
+.footer-socials {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 15px;
+}
+
+.footer-icon img {
+    width: 32px;
+    height: 32px;
+    opacity: 0.85;
+    transition: 0.25s ease;
+}
+
+.footer-icon img:hover {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+.footer-copy {
+    font-size: 0.9rem;
+    color: #4A3F35;
+    font-weight: 500;
+}
+
+/* ---------------------------------------------------
+   RESPONSIVE DESIGN — luxury boutique breakpoints
+--------------------------------------------------- */
+
+/* Tablets (max-width: 900px) */
+@media (max-width: 900px) {
+
+    .lux-nav {
+        padding: 16px 24px;
+    }
+
+    .lux-brand {
+        font-size: 1.4rem;
+    }
+
+    .top-menu {
+        gap: 12px;
+        padding: 20px 12px;
+    }
+
+    .card-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        padding: 30px 20px;
+        gap: 24px;
+    }
+}
+
+/* Mobile (max-width: 600px) */
+@media (max-width: 600px) {
+
+    /* NAV BAR */
+    .lux-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 16px 20px;
+    }
+
+    .lux-logo {
+        height: 34px;
+    }
+
+    .lux-brand {
+        font-size: 1.3rem;
+    }
+
+    /* CATEGORY MENU */
+    .top-menu {
+        flex-wrap: wrap;
+        gap: 14px;
+        padding: 12px 20px;
+    }
+
+    .menu-link {
+        font-size: 0.95rem;
+    }
+
+    /* CARDS */
+    .card-grid {
+        grid-template-columns: 1fr;
+        padding: 24px 16px;
+        gap: 20px;
+    }
+
+    .item-card {
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .item-card img {
+        height: 140px;
+    }
+
+    /* AUTH PAGES */
+    .auth-card {
+        width: 90%;
+        padding: 28px;
+    }
+}
+/* Fix horizontal overflow */
+body, html {
+    overflow-x: hidden;
+}

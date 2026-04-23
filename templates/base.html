@@ -1,4 +1,3 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,45 +5,38 @@
     <title>Blooming Seeds</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body>
-<nav class="navbar">
-    <div class="nav-left">
-        <a href="{{ url_for('dashboard') }}" class="nav-link">Home</a>
-        {% if session.get('user_id') %}
-            <a href="{{ url_for('cart') }}" class="nav-link">
-                Cart
-                {% set cart = session.get('cart', {}) %}
-                {% if cart %}
-                    <span class="cart-count">
-                        {{ cart|map('int')|list|length if false else cart|length }}
-                    </span>
-                {% endif %}
-            </a>
-            <a href="{{ url_for('bloomybot') }}" class="nav-link">BloomyBot</a>
-        {% endif %}
-    </div>
-    <div class="nav-right">
-        <span class="site-name">Blooming Seeds</span>
-        {% if session.get('user_id') %}
-            <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="nav-link">Login</a>
-        {% endif %}
-    </div>
-</nav>
 
-<div class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-container">
-          {% for category, message in messages %}
-            <div class="flash flash-{{ category }}">{{ message }}</div>
-          {% endfor %}
+<body>
+
+    <!-- Always show brand section -->
+    <nav class="lux-nav">
+        <div class="nav-left">
+            <img src="/static/images/logo.jpeg" class="lux-logo">
+            <span class="lux-brand">Blooming Seeds</span>
+
+            {% if request.endpoint not in ['login', 'signup'] and request.endpoint != 'dashboard' %}
+                <a href="{{ url_for('dashboard') }}" class="lux-nav-link">Home</a>
+            {% endif %}
         </div>
-      {% endif %}
-    {% endwith %}
+
+        <div class="nav-right">
+            {% if request.endpoint not in ['login', 'signup'] %}
+                {% if session.get("user_id") %}
+                    <span class="nav-username">{{ session.get('user_name') }}</span>
+
+                    <a href="{{ url_for('profile') }}" class="profile-btn">
+                        <img 
+                            src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}"
+                            class="profile-img"
+                            alt="Profile"
+                        >
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </nav>
 
     {% block content %}{% endblock %}
-</div>
+
 </body>
 </html>

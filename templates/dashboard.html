@@ -1,13 +1,170 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Welcome, {{ user[1] }}!</h1>
-<p>Select a category to start growing your garden.</p>
 
-<div class="category-grid">
-    {% for cat in categories %}
-    <a href="{{ url_for('category_page', category_name=cat) }}" class="category-card">
-        <h3>{{ cat.title() }}</h3>
-    </a>
-    {% endfor %}
+<!-- CATEGORY MENU -->
+<div class="top-menu"></div>
+
+<div class="welcome">
+    <h2 class="category-title">Welcome back, {{ session.get('user_name') }}!</h2>
+    <p style="text-align:center; margin-top:10px; color:#4A3F35;">
+        Select a category to continue growing your garden.
+    </p>
 </div>
+
+<!-- CATEGORY SLIDER -->
+<div class="category-slider-container">
+
+    <button class="slider-arrow left-arrow">&#10094;</button>
+
+    <div class="category-slider" id="categorySlider">
+        {% for category in categories %}
+        <div class="slide">
+            <h2>{{ category.title() }}</h2>
+            <a href="{{ url_for('category_page', category_name=category) }}" class="browse-btn">
+                Browse
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button class="slider-arrow right-arrow">&#10095;</button>
+
+</div>
+
+<!-- ⭐ CUSTOMER GALLERY SECTION ⭐ -->
+<div class="gallery-section">
+    <h2 class="gallery-title">Share your Growth!</h2>
+    <h3>#BloomingSeeds</h3>
+
+    <div class="gallery-grid">
+        <img src="{{ url_for('static', filename='images/people1.jpeg') }}" alt="Customer Photo 1">
+        <img src="{{ url_for('static', filename='images/people2.jpeg') }}" alt="Customer Photo 2">
+        <img src="{{ url_for('static', filename='images/people3.jpeg') }}" alt="Customer Photo 3">
+        <img src="{{ url_for('static', filename='images/people4.jpeg') }}" alt="Customer Photo 4">
+    </div>
+</div>
+
+<!-- ⭐ OUR STORY SECTION ⭐ -->
+<div class="story-section">
+    <h2 class="story-title">The Mission</h2>
+
+    <p class="story-text">
+        "At Blooming Seeds, our mission is to bring the highest quality organic seeds directly to your doorstep, 
+        making it easier than ever to grow with confidence and care. We are committed to offering sustainably 
+        sourced, non-GMO seeds at affordable prices, ensuring that everyone—from first-time gardeners to seasoned 
+        growers—has access to nature’s best. Our focus is on reliability, value, and customer satisfaction, and 
+        we proudly stand behind every order with a guarantee that reflects our dedication to your success."
+    </p>
+</div>
+
+
+<!-- ⭐ MAP SECTION (Leaflet.js — no API key needed) ⭐ -->
+<div class="map-section">
+    <h2 class="map-title">Our Location</h2>
+    <div id="map" class="map-container"></div>
+</div>
+
+<!-- LEAFLET CSS + JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- LEAFLET MAP SCRIPT WITH FLOWER PIN -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const map = L.map('map').setView([40.0379, -76.3055], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    const flowerIcon = L.icon({
+        iconUrl: "{{ url_for('static', filename='images/flower-pin.png') }}",
+        iconSize: [48, 48],
+        iconAnchor: [24, 48],
+        popupAnchor: [0, -48]
+    });
+
+    L.marker([40.0379, -76.3055], { icon: flowerIcon })
+        .addTo(map)
+        .bindPopup("Blooming Seeds Location");
+});
+</script>
+
+<!-- 🌸 DASHBOARD-ONLY FOOTER -->
+<footer class="lux-footer">
+    <div class="footer-socials">
+
+        <a href="https://www.instagram.com" target="_blank" class="footer-icon">
+            <img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram">
+        </a>
+
+        <a href="https://www.facebook.com" target="_blank" class="footer-icon">
+            <img src="{{ url_for('static', filename='images/facebook.png') }}" alt="Facebook">
+        </a>
+
+        <a href="https://www.tiktok.com" target="_blank" class="footer-icon">
+            <img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="TikTok">
+        </a>
+
+    </div>
+
+    <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
+</footer>
+
+<!-- SLIDER SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const slider = document.getElementById("categorySlider");
+    const slides = slider.querySelectorAll(".slide");
+    const leftArrow = document.querySelector(".left-arrow");
+    const rightArrow = document.querySelector(".right-arrow");
+
+    let index = 0;
+    let slideWidth = slides[0].offsetWidth + 20;
+
+    function updateWidth() {
+        slideWidth = slides[0].offsetWidth + 20;
+        goToSlide(index, false);
+    }
+
+    window.addEventListener("resize", updateWidth);
+
+    function setActiveSlide(i) {
+        slides.forEach(s => s.classList.remove("active"));
+        slides[i].classList.add("active");
+    }
+
+    function goToSlide(i, animate = true) {
+        slider.style.transition = animate ? "transform 0.4s ease" : "none";
+        slider.style.transform = `translateX(${-i * slideWidth}px)`;
+        setActiveSlide(i);
+    }
+
+    function nextSlide() {
+        if (index === slides.length - 1) {
+            index = 0;
+            goToSlide(index, true);
+        } else {
+            index++;
+            goToSlide(index);
+        }
+    }
+
+    function prevSlide() {
+        if (index === 0) {
+            index = slides.length - 1;
+            goToSlide(index, true);
+        } else {
+            index--;
+            goToSlide(index);
+        }
+    }
+
+    rightArrow.addEventListener("click", nextSlide);
+    leftArrow.addEventListener("click", prevSlide);
+
+    setActiveSlide(0);
+});
+</script>
+
 {% endblock %}
