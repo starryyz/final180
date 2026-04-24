@@ -7,16 +7,18 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# ---------- Helpers ----------
+# db helpers
 
 def get_db_connection():
     return pymysql.connect(
         host=Config.MYSQL_HOST,
         user=Config.MYSQL_USER,
         password=Config.MYSQL_PASSWORD,
-        database=Config.MYSQL_DATABASE,
-        cursorclass=pymysql.cursors.DictCursor
+        database=Config.MYSQL_DB,
+        port=Config.MYSQL_PORT,
+        cursorclass=pymysql.cursors.DictCursor  # revised
     )
+
 
 def get_db_cursor():
     conn = get_db_connection()
@@ -37,9 +39,10 @@ def current_user():
 
 def is_admin():
     user = current_user()
-    return user and user[4] == 1  # is_admin
+    return user and user["is_admin"] == 1  # revised
 
-# ---------- Auth routes ----------
+
+# login/sign up routes
 
 @app.route("/")
 def home():
@@ -56,12 +59,13 @@ def login():
         user = cur.fetchone()
         cur.close()
 
-        if user and check_password_hash(user[2], password):
-            session["user_id"] = user[0]
-            session["user_name"] = user[1]
+        if user and check_password_hash(user["password_hash"], password):
+            session["user_id"] = user["id"]  # revised
+            session["user_name"] = user["first_name"]  # revised
 
-            if user[3] == 1:
+            if user["is_admin"] == 1:  # revised
                 return redirect(url_for("admin_dashboard"))
+
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid credentials", "danger")
@@ -105,7 +109,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# ---------- User dashboard & categories ----------
+# user optionns/categories routes
 
 CATEGORIES = [
     "seeds",
@@ -150,7 +154,7 @@ def category_page(category_name):
         products=products
     )
 
-# ---------- Cart & checkout ----------
+# cart and checkout routes
 
 @app.route("/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
@@ -186,12 +190,11 @@ def cart():
             cur.execute("SELECT id, name, price FROM products WHERE id = %s", (pid,))
             product = cur.fetchone()
             if product:
-                subtotal = product[2] * qty
-                total += subtotal
+                subtotal = product["price"] * qty  # revised
                 items.append({
-                    "id": product[0],
-                    "name": product[1],
-                    "price": product[2],
+                    "id": product["id"],  # revised
+                    "name": product["name"],  # revised
+                    "price": product["price"],  # revised
                     "quantity": qty,
                     "subtotal": subtotal
                 })
@@ -213,17 +216,19 @@ def checkout():
     if request.method == "POST":
         pickup_option = request.form.get("pickup_option", "delivery")
 
-        cur = get_db_cursor()
+        conn = get_db_connection()  # revised
+        cur = conn.cursor()  # revised
+
         try:
             cur.execute("""
                 INSERT INTO orders (user_id, status, pickup_option)
                 VALUES (%s, 'pending', %s)
-            """, (user[0], pickup_option))
+            """, (user["id"], pickup_option))  # revised
             order_id = cur.lastrowid
 
             for pid, qty in cart.items():
                 cur.execute("SELECT price FROM products WHERE id = %s", (pid,))
-                price = cur.fetchone()[0]
+                price = cur.fetchone()["price"]  # revised
                 cur.execute("""
                     INSERT INTO order_items (order_id, product_id, quantity, price_each)
                     VALUES (%s, %s, %s, %s)
@@ -231,38 +236,22 @@ def checkout():
 
                 cur.execute("UPDATE products SET stock = stock - %s WHERE id = %s", (qty, pid))
 
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("""
-                INSERT INTO orders (user_id, status, pickup_option)
-                VALUES (%s, 'pending', %s)
-            """, (user[0], pickup_option))
-            order_id = cur.lastrowid
-
-            for pid, qty in cart.items():
-                cur.execute("SELECT price FROM products WHERE id = %s", (pid,))
-                price = cur.fetchone()[0]
-                cur.execute("""
-                    INSERT INTO order_items (order_id, product_id, quantity, price_each)
-                    VALUES (%s, %s, %s, %s)
-                """, (order_id, pid, qty, price))
-
-                cur.execute("UPDATE products SET stock = stock - %s WHERE id = %s", (qty, pid))
-
-            conn.commit()
+            conn.commit()  # revised
             session["cart"] = {}
             flash("Order placed! You'll be notified when it's approved or shipped.", "success")
             return redirect(url_for("dashboard"))
+
         except Exception as e:
             conn.rollback()
             flash("Error placing order.", "danger")
+
         finally:
             cur.close()
             conn.close()
 
     return render_template("checkout.html", user=user)
 
-# ---------- Admin routes ----------
+# admin routes
 
 @app.route("/admin")
 def admin_dashboard():
@@ -318,7 +307,7 @@ def admin_update_order_status(order_id):
 
     return redirect(url_for("admin_orders"))
 
-# ---------- BloomyBot ----------
+# bloomy bot
 
 @app.route("/bloomybot")
 def bloomybot():
@@ -326,7 +315,7 @@ def bloomybot():
     return render_template("bloomybot.html", user=user)
 
 
-# ---------- User Profile ----------
+# user profile
 
 import os
 from werkzeug.utils import secure_filename
@@ -346,32 +335,32 @@ def profile():
         phone = request.form.get("phone")
         address = request.form.get("address")
 
-        # Update user info
+        # update info
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
             UPDATE users
             SET first_name=%s, last_name=%s, phone=%s, address=%s
             WHERE id=%s
-        """, (first_name, last_name, phone, address, user[0]))
+        """, (first_name, last_name, phone, address, user["id"]))  # revised
         conn.commit()
         cur.close()
         conn.close()
 
-        # Update session name if changed
+        # session update
         session["user_name"] = first_name
 
-        # Handle profile picture upload
+        # pfp upload
         if "profile_pic" in request.files:
             file = request.files["profile_pic"]
             if file and file.filename != "":
-                filename = secure_filename(f"user_{user[0]}.png")
+                filename = secure_filename(f"user_{user['id']}.png")  # revised
                 filepath = os.path.join(PROFILE_FOLDER, filename)
                 file.save(filepath)
 
                 conn = get_db_connection()
                 cur = conn.cursor()
-                cur.execute("UPDATE users SET profile_pic=%s WHERE id=%s", (filename, user[0]))
+                cur.execute("UPDATE users SET profile_pic=%s WHERE id=%s", (filename, user["id"]))  # revised
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -380,18 +369,18 @@ def profile():
 
         flash("Profile updated successfully!", "success")
 
-        # ⭐ Reload updated user info
+        # updated info
         cur = get_db_cursor()
-        cur.execute("SELECT id, first_name, last_name, email, phone, address, profile_pic FROM users WHERE id=%s", (user[0],))
+        cur.execute("SELECT id, first_name, last_name, email, phone, address, profile_pic FROM users WHERE id=%s", (user["id"],))  # revised
         updated_user = cur.fetchone()
         cur.close()
 
         return render_template("profile.html", user=updated_user)
 
-    # GET request — load profile picture
+    # loading pfp
     cur = get_db_cursor()
-    cur.execute("SELECT profile_pic FROM users WHERE id=%s", (user[0],))
-    pic = cur.fetchone()[0]
+    cur.execute("SELECT profile_pic FROM users WHERE id=%s", (user["id"],))  # revised
+    pic = cur.fetchone()["profile_pic"]
     cur.close()
 
     if pic:
@@ -404,5 +393,4 @@ def profile():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
-
 
