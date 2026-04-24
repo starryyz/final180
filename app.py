@@ -76,6 +76,7 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
+        username = request.form["username"]          # NEW
         first_name = request.form["first_name"]
         last_name = request.form["last_name"]
         email = request.form["email"]
@@ -89,15 +90,15 @@ def signup():
         cur = conn.cursor()
         try:
             cur.execute("""
-                INSERT INTO users (first_name, last_name, email, phone, address, password_hash)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (first_name, last_name, email, phone, address, password_hash))
+                INSERT INTO users (username, first_name, last_name, email, phone, address, password_hash)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (username, first_name, last_name, email, phone, address, password_hash))  # UPDATED
             conn.commit()
             flash("Account created! Please log in.", "success")
             return redirect(url_for("login"))
         except Exception as e:
             conn.rollback()
-            flash("Error creating account. Maybe email already exists.", "danger")
+            flash("Error creating account. Maybe username or email already exists.", "danger")
         finally:
             cur.close()
             conn.close()
@@ -391,6 +392,34 @@ def profile():
     return render_template("profile.html", user=user)
 
 
+# admin revision-- dont touch
+# @app.route("/create_admin")
+# def create_admin():
+#     from werkzeug.security import generate_password_hash
+#
+#     password_hash = generate_password_hash("admin123")
+#
+#     conn = get_db_connection()
+#     cur = conn.cursor()
+#     cur.execute("""
+#         INSERT INTO users (username, first_name, last_name, email, phone, address, password_hash, is_admin)
+#         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+#     """, (
+#         "admin",
+#         "Admin",
+#         "User",
+#         "admin@example.com",
+#         "000-000-0000",
+#         "123 Admin Street",
+#         password_hash,
+#         True
+#     ))
+#     conn.commit()
+#     cur.close()
+#     conn.close()
+#
+#     return "Admin user created. You can now log in."
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
-
