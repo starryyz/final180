@@ -1,37 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-
-<!-- CATEGORY MENU -->
-<div class="top-menu"></div>
-
 <div class="welcome">
     <h2 class="category-title">Welcome back, {{ session.get('user_name') }}!</h2>
-    <p style="text-align:center; margin-top:10px; color:#4A3F35;">
-        Select a category to continue growing your garden.
-    </p>
+    <p class ="desc-title">Select a category to continue growing your garden.</p>
 </div>
-
-<!-- CATEGORY SLIDER -->
 <div class="category-slider-container">
-
     <button class="slider-arrow left-arrow">&#10094;</button>
 
     <div class="category-slider" id="categorySlider">
         {% for category in categories %}
-        <div class="slide">
-            <h2>{{ category.title() }}</h2>
-            <a href="{{ url_for('category_page', category_name=category) }}" class="browse-btn">
-                Browse
-            </a>
+        {% set category_slug = category.lower().replace(' ', '-') %}
+        <div class="slide slide-{{ category_slug }}">
+            
+            <div class="slide-image">
+                <img src="{{ url_for('static', filename='images/' + category_slug + '.png') }}" alt="{{ category }}">
+            </div>
+
+            <div class="slide-info">
+                <h2>{{ category.title() }}</h2>
+                <a href="{{ url_for('category_page', category_name=category) }}" class="browse-btn">
+                    Browse
+                </a>
+            </div>
+            
         </div>
         {% endfor %}
     </div>
 
     <button class="slider-arrow right-arrow">&#10095;</button>
-
 </div>
 
-<!-- ⭐ CUSTOMER GALLERY SECTION ⭐ -->
 <div class="gallery-section">
     <h2 class="gallery-title">Share your Growth!</h2>
     <h3>#BloomingSeeds</h3>

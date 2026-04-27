@@ -3,40 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Blooming Seeds</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Autour+One&family=DynaPuff:wght@400..700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+<nav class="lux-nav">
+    <div class="nav-left">
+        <a href="{{ url_for('dashboard') }}">
+            <img src="/static/images/logo.png" class="logo" alt="Logo">
+        </a>
+    </div>
+<div class="nav-right">
+    <span class="nav-link">
+        <a href="{{ url_for('dashboard') }}">Home</a>
+    </span>
 
-    <!-- Always show brand section -->
-    <nav class="lux-nav">
-        <div class="nav-left">
-            <img src="/static/images/logo.jpeg" class="lux-logo">
-            <span class="lux-brand">Blooming Seeds</span>
+    <span class="nav-link">
+        <a href="#">Contact Us</a>
+    </span>
 
-            {% if request.endpoint not in ['login', 'signup'] and request.endpoint != 'dashboard' %}
-                <a href="{{ url_for('dashboard') }}" class="lux-nav-link">Home</a>
-            {% endif %}
-        </div>
+    <!-- Login / Logout -->
+    <span class="nav-link">
+        {% if session.get("user_id") %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('cart') }}"><ion-icon name="cart-outline"></ion-icon></a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </span>
 
-        <div class="nav-right">
-            {% if request.endpoint not in ['login', 'signup'] %}
-                {% if session.get("user_id") %}
-                    <span class="nav-username">{{ session.get('user_name') }}</span>
+    {% if request.endpoint not in ['login', 'signup'] %}
+        {% if session.get("user_id") %}
+            <span class="nav-username">
+                {{ session.get('user_name') }}
+            </span>
 
-                    <a href="{{ url_for('profile') }}" class="profile-btn">
-                        <img 
-                            src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}"
-                            class="profile-img"
-                            alt="Profile"
-                        >
-                    </a>
-                {% endif %}
-            {% endif %}
-        </div>
-    </nav>
-
-    {% block content %}{% endblock %}
-
+            <a href="{{ url_for('profile') }}" class="profile-btn">
+                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
+                     class="profile-img">
+            </a>
+        {% endif %}
+    {% endif %}
+</div>
+</nav>
+{% block content %}{% endblock %}
 </body>
 </html>

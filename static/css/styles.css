@@ -1,27 +1,22 @@
-/* ---------------------------------------------------
-   GLOBAL BACKGROUND — warm beige luxury
---------------------------------------------------- */
 body {
-    background: linear-gradient(180deg, #F4EDE4, #F8F5F0);
-    font-family: "Inter", sans-serif;
+    background: linear-gradient(180deg, #FAF9F6, #F4EDE4); 
+    color: #4A3F35;
+    font-family: "Inter", sans-serif; 
     margin: 0;
     padding: 0;
     color: #4A3F35;
 }
 
-/* ---------------------------------------------------
- NAV BAR — logo + brand on LEFT
---------------------------------------------------- */
 .lux-nav {
     width: 100%;
-    background: #F4EDE4;
+    background: #76a26a;
     padding: 10px 20px;
     display: flex;
-    justify-content: flex-start;   /* keeps items aligned left */
-    align-items: center;
-    border-bottom: 1px solid rgba(74, 63, 53, 0.15);
+    justify-content: flex-start;   
+    align-items: left;
     box-sizing: border-box;
 }
+
 .lux-nav-link {
     margin-left: 20px;
     color: #4A3F35;
@@ -39,29 +34,54 @@ body {
 }
 
 .nav-username {
+    font-family:"Autour One", system-ui;
+     font-size:16px;
     margin-right: 15px;
     font-weight: 600;
-    color: #4A3F35;
 }
 
 .nav-left {
-    padding: 20px;
+    padding:20px 0px 10px 10px;
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
 .nav-right {
-    margin-left: auto;      /* pushes logout to the right */
-    padding-left: 40px;     /* space between brand + logout */
-    padding-right: 32px;    /* space from right edge */
+    font-family: "Autour One", system-ui;
+    color: white;
+    font-size: 16px;
+    margin-left: auto;      
+    padding-right: 32px;    
     display: flex;
-    align-items: center;
+    align-items: center; 
+    gap: 15px;           
 }
 
-.lux-logo {
-    height: 42px;
-    width: auto;
+.logo {
+  margin:0px 0px 0px 10px;
+  width: 260px; 
+  height: auto;
+}
+
+ion-icon {
+    font-size: 25px; 
+    transition: transform 0.2s ease-in-out; 
+    display: inline-flex; 
+    vertical-align: middle;
+}
+
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(0eg); }
+    75% { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
+}
+
+ion-icon:hover {
+    animation: shake 0.3s; 
+    animation-iteration-count: infinite; 
 }
 
 .lux-brand {
@@ -72,26 +92,31 @@ body {
 }
 
 .nav-right a {
-    background: #D7C49E; /* champagne gold */
-    padding: 9px 18px;
-    border-radius: 8px;
-    color: #4A3F35;
+    padding: 4px 12px; 
+    display: flex;
+    align-items: center;
     text-decoration: none;
+    color: white;
     font-weight: 600;
     transition: 0.25s ease;
 }
 
-.nav-right a:hover {
-    background: #CBB68F;
+.nav-right .nav-link a {
+    display: inline-block;
+    transition: transform 0.2s ease;
 }
-/* 🌼 Animated Daisy Divider */
+
+.nav-right .nav-link a:hover {
+    transform: scale(1.08);
+}
+
 .daisy-divider {
     width: 100%;
-    height: 22px; /* adjust height */
-    background-color: #0d77161f; /* same soft green */
+    height: 22px; 
+    background-color: #0d77161f; 
     background-image: url('/static/images/daisy-strip.png');
     background-repeat: repeat-x;
-    background-size: 120px auto; /* size of each daisy cluster */
+    background-size: 120px auto; 
     animation: slide-daisies 12s linear infinite;
     margin: 20px 0 30px 0;
     border-radius: 8px;
@@ -149,7 +174,7 @@ body {
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
-/* PROFILE PAGE — elegant user info panel */
+/* PROFILE PAGE */
 .profile-btn {
     display: inline-block;
     margin-right: 15px;
@@ -160,7 +185,7 @@ body {
     height: 38px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #d8c3a5; /* luxury beige border */
+    border: 2px solid white; 
     cursor: pointer;
     transition: 0.25s ease;
 }
@@ -222,7 +247,7 @@ body {
 .logout-btn {
     display: inline-block;
     padding: 12px 20px;
-    background: #c97f7f; /* soft muted rose */
+    background: #c97f7f; 
     color: white;
     border-radius: 10px;
     font-weight: 600;
@@ -235,7 +260,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* PLANT DESCRIPTION CARDS */
 .item-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -290,7 +314,6 @@ body {
     color: #6b5e53;
 }
 
-/* MISSION STATEMENT SECTION */
 .story-section {
     margin-top: 50px;
     padding: 32px;
@@ -323,28 +346,19 @@ body {
     margin: 0 auto;
 }
 
-
-/* 🌸 GLASS PANEL FOR MAP SECTION */
 .map-section {
     margin-top: 50px;
     padding: 32px;
     border-radius: 28px;
-
-    /* frosted glass */
     background: #0d77161f;
     backdrop-filter: blur(22px) saturate(180%);
     -webkit-backdrop-filter: blur(22px) saturate(180%);
-
-    /* soft warm border */
     border: 1px solid rgba(255, 255, 255, 0.28);
-
-    /* luxury shadow */
     box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.08),
         inset 0 0 40px rgba(255, 255, 255, 0.25);
 }
 
-/* 🌿 MAP TITLE */
 .map-title {
     font-size: 1.8rem;
     font-weight: 600;
@@ -354,26 +368,21 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* 🌼 MAP CONTAINER */
 .map-container {
     width: 100%;
     height: 360px;
     border-radius: 20px;
     overflow: hidden;
-
-    /* subtle border + glow */
     border: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow:
         0 4px 20px rgba(0, 0, 0, 0.06),
         inset 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
-/* 🌺 LEAFLET MAP TINT (warm beige overlay) */
 .leaflet-container {
     background: rgba(244, 237, 228, 0.35) !important;
 }
 
-/* Optional: soften map controls */
 .leaflet-control-zoom a {
     background: rgba(255, 255, 255, 0.6) !important;
     backdrop-filter: blur(6px);
@@ -385,22 +394,6 @@ body {
     background: rgba(255, 255, 255, 0.85) !important;
 }
 
-
-/* ---------------------------------------------------
-   CATEGORY MENU — soft blush bar
---------------------------------------------------- */
-.top-menu {
-    width: 100%;
-  background: #0d77161f;
-    padding: 14px 32px;
-    display: flex;
-    flex-wrap: wrap;   /* <-- THIS FIXES THE CUT-OFF */
-    gap: 20px;
-    align-items: center;
-    box-sizing: border-box; /* prevents overflow from padding */
-}
-
-
 .menu-link {
     color: #4A3F35;
     font-weight: 600;
@@ -410,32 +403,34 @@ body {
 }
 
 .menu-link:hover {
-    color: #7A5C58; /* deeper blush-brown */
+    color: #7A5C58; 
 }
 
 
-
-/* ---------------------------------------------------
-   CATEGORY TITLE
---------------------------------------------------- */
 .category-title {
+    font-family:"Autour One", system-ui;
     text-align: center;
-    margin-top: 28px;
+    margin-top: 90px;
     font-size: 2rem;
     color: #4A3F35;
     font-weight: 600;
 }
 
+.desc-title {
+    font-family:"Autour One", system-ui;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1.0rem;
+    color: #4A3F35;
+    font-weight: 400;
+}
 
 
-/* ---------------------------------------------------
-   ITEM CARDS — boutique product grid
---------------------------------------------------- */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 32px;
-    padding: 40px 20px; /* reduced left/right padding */
+    padding: 40px 20px; 
     box-sizing: border-box;
 }
 
@@ -462,11 +457,6 @@ body {
     box-shadow: 0 12px 28px rgba(0,0,0,0.10);
 }
 
-
-
-/* ---------------------------------------------------
-   AUTH PAGE — kept your original vibe but recolored
---------------------------------------------------- */
 .auth-container {
     display: flex;
     justify-content: center;
@@ -561,29 +551,15 @@ body {
     text-decoration: underline;
 }
 
-/* ---------------------------------------------------
-   CATEGORY SLIDER — luxury boutique style
---------------------------------------------------- */
-
 .category-slider-container {
     position: relative;
     width: 100%;
     padding: 40px 0;
-
-    /* GLASS EFFECT */
-    background: rgba(255, 255, 255, 0.25); /* soft white tint */
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
-
-
-
-
 
 .category-slider {
     display: flex;
@@ -592,20 +568,40 @@ body {
     will-change: transform;
 }
 
-
 .slide {
-    min-width: 280px;
-    height: 180px;
-    background: #F4EDE4;
+    min-width: 180px;
+    height: 300px;
+    background: #fef9f5;
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    border: 1px solid rgba(74, 63, 53, 0.12);
+    border: 2px solid #f0e8e0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 20px;
     text-align: center;
+}
+
+/* Add this to control the images inside the slider slides */
+.slide-image img {
+    width: 100%;
+    height: 150px;    /* Force a consistent height */
+    object-fit: contain; /* Prevents the image from stretching/distorting */
+    margin-bottom: 10px;
+}
+
+.slide-image {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slide-image img {
+    width: 100%;
+    height: 150px;    
+    object-fit: contain; 
+    margin-bottom: 10px;
 }
 
 .slide h2 {
@@ -622,6 +618,26 @@ body {
     text-decoration: none;
     font-weight: 600;
     transition: 0.25s ease;
+}
+
+.slide:nth-child(3n+1) .browse-btn {
+    background-color: #6FAF73; 
+    color: white; 
+}
+
+.slide:nth-child(3n+2) .browse-btn {
+    background-color: #E88AAE; 
+    color: white;
+}
+
+.slide:nth-child(3n) .browse-btn {
+    background-color: #C56E4D;
+    color: white;
+}
+
+.slide .browse-btn:hover {
+    filter: brightness(90%);
+    transform: scale(1.05);
 }
 
 .browse-btn:hover {
@@ -657,7 +673,7 @@ body {
     top: auto;     
     left: 20px;
     bottom: 20px;  
-    transform: none; /* position at bottom left */
+    transform: none; 
 }
 
 .right-arrow {
@@ -666,7 +682,7 @@ body {
     top: auto;                
     transform: none;           
 }
-/* Netflix-style active slide scaling */
+
 .slide {
     transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
@@ -677,17 +693,11 @@ body {
     z-index: 5;
 }
 
-/* 🌿 LUXURY FOOTER */
 .lux-footer {
     margin-top: 60px;
     padding: 30px 20px;
     text-align: center;
-
     background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
-
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
     border-radius: 20px 20px 0 0;
 }
@@ -717,11 +727,6 @@ body {
     font-weight: 500;
 }
 
-/* ---------------------------------------------------
-   RESPONSIVE DESIGN — luxury boutique breakpoints
---------------------------------------------------- */
-
-/* Tablets (max-width: 900px) */
 @media (max-width: 900px) {
 
     .lux-nav {
@@ -743,11 +748,7 @@ body {
         gap: 24px;
     }
 }
-
-/* Mobile (max-width: 600px) */
 @media (max-width: 600px) {
-
-    /* NAV BAR */
     .lux-nav {
         flex-direction: column;
         align-items: flex-start;
@@ -755,15 +756,10 @@ body {
         padding: 16px 20px;
     }
 
-    .lux-logo {
-        height: 34px;
-    }
-
     .lux-brand {
         font-size: 1.3rem;
     }
 
-    /* CATEGORY MENU */
     .top-menu {
         flex-wrap: wrap;
         gap: 14px;
@@ -774,7 +770,6 @@ body {
         font-size: 0.95rem;
     }
 
-    /* CARDS */
     .card-grid {
         grid-template-columns: 1fr;
         padding: 24px 16px;
@@ -787,16 +782,14 @@ body {
     }
 
     .item-card img {
-        height: 140px;
+        height: 10px;
     }
 
-    /* AUTH PAGES */
     .auth-card {
         width: 90%;
         padding: 28px;
     }
 }
-/* Fix horizontal overflow */
 body, html {
     overflow-x: hidden;
 }
