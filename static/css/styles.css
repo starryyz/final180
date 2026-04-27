@@ -1,3 +1,18 @@
+html, body {
+    cursor: url('../images/cursor1.png') 4 4, auto;
+}
+
+button:hover,
+a:hover,
+input:hover,
+select:hover,
+textarea:hover,
+.clickable:hover {
+    cursor: url('../images/pointer1.png') 4 4, pointer;
+}
+
+/* cursor and pointer */
+
 body {
     background: linear-gradient(180deg, #FAF9F6, #F4EDE4); 
     color: #4A3F35;
@@ -6,7 +21,6 @@ body {
     padding: 0;
     color: #4A3F35;
 }
-
 .lux-nav {
     width: 100%;
     background: #76a26a;
