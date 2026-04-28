@@ -8,13 +8,13 @@
     </tr>
     {% for o in orders %}
     <tr>
-        <td>{{ o[0] }}</td>
-        <td>{{ o[1] }} {{ o[2] }}</td>
-        <td>{{ o[3] }}</td>
-        <td>{{ o[4] }}</td>
-        <td>{{ o[5] }}</td>
+        <td>{{ o.id }}</td>
+        <td>{{ o.first_name }} {{ o.last_name }}</td>
+        <td>{{ o.status }}</td>
+        <td>{{ o.pickup_option }}</td>
+        <td>{{ o.created_at }}</td>
         <td>
-            <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o[0]) }}">
+            <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o.id) }}">
                 <select name="status">
                     <option value="approved">Approve</option>
                     <option value="declined">Decline</option>
@@ -26,4 +26,4 @@
     </tr>
     {% endfor %}
 </table>
-{% endblock 
+{% endblock %}
