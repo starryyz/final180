@@ -472,11 +472,12 @@ ion-icon:hover {
     align-items: center;
     padding-top: 60px;
     padding-bottom: 60px;
+    background-color: #f1fef6;
 }
-
+/* login card */
 .auth-card {
     width: 430px;
-    background: #ffffff;
+    background: #f5ebf1;
     padding: 35px;
     border-radius: 16px;
     box-shadow: 0 6px 22px rgba(0,0,0,0.08);
@@ -485,7 +486,7 @@ ion-icon:hover {
 
 .auth-title {
     text-align: center;
-    color: #4A3F35;
+    color: #354a46;
     margin-bottom: 28px;
     font-size: 28px;
     font-weight: 600;
@@ -499,7 +500,7 @@ ion-icon:hover {
 
 .input-group label {
     font-size: 14px;
-    color: #4A3F35;
+    color: #354a46;
     margin-bottom: 6px;
     font-weight: 500;
 }
@@ -507,10 +508,10 @@ ion-icon:hover {
 .input-group input {
     padding: 13px;
     border-radius: 10px;
-    border: 1px solid rgba(74, 63, 53, 0.25);
+    border: 1px solid rgba(50, 85, 59, 0.25);
     font-size: 15px;
     outline: none;
-    background: #F8F5F0;
+    background: #fbf7fa;
     transition: 0.25s ease;
     background-image: url(/static/images/flower.png);
     background-repeat: no-repeat;
@@ -520,7 +521,7 @@ ion-icon:hover {
 }
 
 .input-group input:focus {
-    border-color: #D7C49E;
+    border-color: #f5e4f0;
     background: #ffffff;
     box-shadow: 0 0 0 3px rgba(215, 196, 158, 0.35);
 }
@@ -528,8 +529,8 @@ ion-icon:hover {
 .auth-btn {
     width: 100%;
     padding: 13px;
-    background: #D7C49E;
-    color: #4A3F35;
+    background: #cbf3cd;
+    color: #354a46;
     border: none;
     border-radius: 10px;
     font-size: 17px;
@@ -539,7 +540,7 @@ ion-icon:hover {
 }
 
 .auth-btn:hover {
-    background: #CBB68F;
+    background: #8fcba6;
     transform: translateY(-1px);
 }
 
@@ -547,17 +548,31 @@ ion-icon:hover {
     text-align: center;
     margin-top: 18px;
     font-size: 14px;
-    color: #4A3F35;
+    color: #354a46;
 }
 
 .auth-switch a {
-    color: #7A5C58;
+    color: #354a46;
     text-decoration: none;
     font-weight: 600;
 }
 
 .auth-switch a:hover {
     text-decoration: underline;
+}
+/* login footer */
+.footer-login {
+    margin-top: 30px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f1fef6;
+}
+/* sign up footer */
+.footer-signup {
+    margin-top: 30px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f1fef6;
 }
 
 .category-slider-container {
