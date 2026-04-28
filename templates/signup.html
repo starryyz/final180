@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-
+<style>
+    body {
+        background: #f1fef6;
+    }
+</style>
 <div class="auth-container">
     <div class="auth-card">
-        <h2 class="auth-title">Become a Seedling 🌱</h2>
+        <h2 class="auth-title">Become a Seedling !</h2>
 
         <form method="POST" action="{{ url_for('signup') }}">
 
@@ -51,6 +55,10 @@
             <a href="{{ url_for('login') }}">Login</a>
         </p>
     </div>
+</div>
+<div>
+    <footer class="footer-signup">
+        <p>&copy; 2026 Blooming Seeds Properties, Inc. All rights reserved.</p>
 </div>
 
 {% endblock %}
