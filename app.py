@@ -111,7 +111,6 @@ def logout():
     return redirect(url_for("login"))
 
 # user optionns/categories routes
-
 CATEGORIES = [
     "seeds",
     "succulents",

@@ -14,9 +14,9 @@ textarea:hover,
 /* cursor and pointer */
 
 body {
-    background: linear-gradient(180deg, #FAF9F6, #F4EDE4); 
+    background: linear-gradient(180deg, #FAF9F6, #FAF9F6); 
     color: #4A3F35;
-    font-family: "Inter", sans-serif; 
+    font-family:"Autour One", system-ui;
     margin: 0;
     padding: 0;
     color: #4A3F35;
@@ -24,11 +24,15 @@ body {
 .lux-nav {
     width: 100%;
     background: #76a26a;
-    padding: 10px 20px;
+    padding: 0px 10px;
     display: flex;
     justify-content: flex-start;   
     align-items: left;
     box-sizing: border-box;
+}
+
+h3 {
+    text-align:center;
 }
 
 .lux-nav-link {
@@ -62,7 +66,7 @@ body {
 }
 
 .nav-right {
-    font-family: "Autour One", system-ui;
+    font-family:"Autour One", system-ui;
     color: white;
     font-size: 16px;
     margin-left: auto;      
@@ -74,7 +78,7 @@ body {
 
 .logo {
   margin:0px 0px 0px 10px;
-  width: 260px; 
+  width: 230px; 
   height: auto;
 }
 
@@ -149,11 +153,7 @@ ion-icon:hover {
     margin-top: 50px;
     padding: 32px;
     border-radius: 28px;
-
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(22px) saturate(180%);
-    -webkit-backdrop-filter: blur(22px) saturate(180%);
-
+    background:linear-gradient(180deg, #fef9f5, #fef9f5);
     border: 1px solid rgba(255, 255, 255, 0.28);
     box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.08),
@@ -188,7 +188,6 @@ ion-icon:hover {
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
-/* PROFILE PAGE */
 .profile-btn {
     display: inline-block;
     margin-right: 15px;
@@ -332,11 +331,7 @@ ion-icon:hover {
     margin-top: 50px;
     padding: 32px;
     border-radius: 28px;
-
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(22px) saturate(180%);
-    -webkit-backdrop-filter: blur(22px) saturate(180%);
-
+    background:linear-gradient(180deg, #fef9f5, #fef9f5);
     border: 1px solid rgba(255, 255, 255, 0.28);
     box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.08),
@@ -364,7 +359,7 @@ ion-icon:hover {
     margin-top: 50px;
     padding: 32px;
     border-radius: 28px;
-    background: #0d77161f;
+    background:linear-gradient(180deg, #fef9f5, #fef9f5);
     backdrop-filter: blur(22px) saturate(180%);
     -webkit-backdrop-filter: blur(22px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.28);
@@ -566,13 +561,12 @@ ion-icon:hover {
 }
 
 .category-slider-container {
-    position: relative;
-    width: 100%;
-    padding: 40px 0;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-radius: 20px;
+    position: relative; 
+    display: flex;
+    align-items: center;
     overflow: hidden;
+    padding: 20px 0;
+    width: 100%;
 }
 
 .category-slider {
@@ -596,11 +590,10 @@ ion-icon:hover {
     text-align: center;
 }
 
-/* Add this to control the images inside the slider slides */
 .slide-image img {
     width: 100%;
-    height: 150px;    /* Force a consistent height */
-    object-fit: contain; /* Prevents the image from stretching/distorting */
+    height: 150px;    
+    object-fit: contain;
     margin-bottom: 10px;
 }
 
@@ -620,18 +613,51 @@ ion-icon:hover {
 
 .slide h2 {
     color: #4A3F35;
-    margin-bottom: 14px;
     font-size: 1.4rem;
+    margin: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    line-height: 1.2;
+    text-align: center;
 }
 
 .browse-btn {
-    background: #D7C49E;
-    padding: 10px 20px;
-    border-radius: 8px;
-    color: #4A3F35;
-    text-decoration: none;
+    display: inline-block;
     font-weight: 600;
-    transition: 0.25s ease;
+    margin-top: auto;
+    position: relative;
+    padding: 10px 30px !important; 
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    z-index: 1;
+    text-align: center;
+    min-width: 100px;
+}
+
+.browse-btn::after {
+    content: '✿'; 
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%) scale(0) rotate(-45deg);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: inherit; 
+}
+
+.browse-btn:hover {
+    padding-right: 45px !important; 
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.browse-btn:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.2) rotate(0deg);
 }
 
 .slide:nth-child(3n+1) .browse-btn {
@@ -650,7 +676,6 @@ ion-icon:hover {
 }
 
 .slide .browse-btn:hover {
-    filter: brightness(90%);
     transform: scale(1.05);
 }
 
@@ -659,28 +684,19 @@ ion-icon:hover {
 }
 
 .slider-arrow {
-    background: #D7C49E;
-    border: none;
-    color: #4A3F35;
-    font-size: 2rem;
-    padding: 10px 16px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: 0.25s ease;
-}
-
-.slider-arrow {
     position: absolute;
-    background: #D7C49E;
+    background: #557544;
     border: none;
-    color: #4A3F35;
+    color: white;
     font-size: 2rem;
     padding: 10px 16px;
+    margin-bottom:150px;
     border-radius: 50%;
     cursor: pointer;
     transition: 0.25s ease;
     z-index: 10;
 }
+
 
 .left-arrow {
     margin-right: 10px;
@@ -711,9 +727,28 @@ ion-icon:hover {
     margin-top: 60px;
     padding: 30px 20px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.12);
+    background:linear-gradient(180deg, #fef9f5, #fef9f5);
     box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
     border-radius: 20px 20px 0 0;
+}
+
+.slide-image {
+    animation: sway 5s ease-in-out infinite;
+}
+
+.slide-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: flex-start;
+    height: 120px; 
+    padding-top: 10px;
+}
+
+@keyframes sway {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(1.9deg); }
+    100% { transform: rotate(0deg); }
 }
 
 .footer-socials {
@@ -724,9 +759,8 @@ ion-icon:hover {
 }
 
 .footer-icon img {
-    width: 32px;
-    height: 32px;
-    opacity: 0.85;
+    width: 45px;
+    height: 45px;
     transition: 0.25s ease;
 }
 

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" type="image/x-icon" href="static/images/icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Autour+One&family=DynaPuff:wght@400..700&display=swap" rel="stylesheet">
 </head>
 
@@ -30,25 +31,17 @@
     <!-- Login / Logout -->
     <span class="nav-link">
         {% if session.get("user_id") %}
-            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
             <a href="{{ url_for('cart') }}"><ion-icon name="cart-outline"></ion-icon></a>
         {% else %}
             <a href="{{ url_for('login') }}">Login</a>
         {% endif %}
     </span>
 
-    {% if request.endpoint not in ['login', 'signup'] %}
-        {% if session.get("user_id") %}
-            <span class="nav-username">
-                {{ session.get('user_name') }}
-            </span>
-
             <a href="{{ url_for('profile') }}" class="profile-btn">
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
-        {% endif %}
-    {% endif %}
 </div>
 </nav>
 {% block content %}{% endblock %}

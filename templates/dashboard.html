@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="welcome">
     <h2 class="category-title">Welcome back, {{ session.get('user_name') }}!</h2>
     <p class ="desc-title">Select a category to continue growing your garden.</p>
 </div>
+
 <div class="category-slider-container">
     <button class="slider-arrow left-arrow">&#10094;</button>
 
@@ -11,18 +13,13 @@
         {% for category in categories %}
         {% set category_slug = category.lower().replace(' ', '-') %}
         <div class="slide slide-{{ category_slug }}">
-            
             <div class="slide-image">
-                <img src="{{ url_for('static', filename='images/' + category_slug + '.png') }}" alt="{{ category }}">
+                <img src="{{ url_for('static', filename='images/' + category_slug + '.png') }}" class="slidesimage">
             </div>
-
             <div class="slide-info">
                 <h2>{{ category.title() }}</h2>
-                <a href="{{ url_for('category_page', category_name=category) }}" class="browse-btn">
-                    Browse
-                </a>
+                <a href="{{ url_for('category_page', category_name=category) }}" class="browse-btn">Browse</a>
             </div>
-            
         </div>
         {% endfor %}
     </div>
@@ -33,50 +30,93 @@
 <div class="gallery-section">
     <h2 class="gallery-title">Share your Growth!</h2>
     <h3>#BloomingSeeds</h3>
-
     <div class="gallery-grid">
-        <img src="{{ url_for('static', filename='images/people1.jpeg') }}" alt="Customer Photo 1">
-        <img src="{{ url_for('static', filename='images/people2.jpeg') }}" alt="Customer Photo 2">
-        <img src="{{ url_for('static', filename='images/people3.jpeg') }}" alt="Customer Photo 3">
-        <img src="{{ url_for('static', filename='images/people4.jpeg') }}" alt="Customer Photo 4">
+        <img src="{{ url_for('static', filename='images/people1.jpg') }}">
+        <img src="{{ url_for('static', filename='images/people2.webp') }}">
+        <img src="{{ url_for('static', filename='images/people3.jpg') }}">
+        <img src="{{ url_for('static', filename='images/people4.avif') }}">
     </div>
 </div>
 
-<!-- ⭐ OUR STORY SECTION ⭐ -->
 <div class="story-section">
     <h2 class="story-title">The Mission</h2>
-
     <p class="story-text">
-        "At Blooming Seeds, our mission is to bring the highest quality organic seeds directly to your doorstep, 
-        making it easier than ever to grow with confidence and care. We are committed to offering sustainably 
-        sourced, non-GMO seeds at affordable prices, ensuring that everyone—from first-time gardeners to seasoned 
-        growers—has access to nature’s best. Our focus is on reliability, value, and customer satisfaction, and 
-        we proudly stand behind every order with a guarantee that reflects our dedication to your success."
+        "Our mission is to bring high quality seeds right to your doorstep, 
+        making it more convenient than ever to grow your own plants!"
     </p>
 </div>
 
-
-<!-- ⭐ MAP SECTION (Leaflet.js — no API key needed) ⭐ -->
 <div class="map-section">
     <h2 class="map-title">Our Location</h2>
-    <div id="map" class="map-container"></div>
+    <div id="map" class="map-container" style="height: 400px; width: 100%;"></div>
 </div>
 
-<!-- LEAFLET CSS + JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<!-- LEAFLET MAP SCRIPT WITH FLOWER PIN -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    const slider = document.getElementById("categorySlider");
+    const slides = Array.from(slider.querySelectorAll(".slide"));
+    const leftArrow = document.querySelector(".left-arrow");
+    const rightArrow = document.querySelector(".right-arrow");
+
+    // Clone slides for endless effect
+    slides.forEach(slide => {
+        const clone = slide.cloneNode(true);
+        slider.appendChild(clone);
+    });
+
+    let index = 0;
+    
+    function getSlideWidth() {
+        const style = window.getComputedStyle(slides[0]);
+        const marginRight = parseFloat(style.marginRight) || 0;
+        return slides[0].offsetWidth + marginRight;
+    }
+
+    function goToSlide(i, animate = true) {
+        const slideWidth = getSlideWidth();
+        slider.style.transition = animate ? "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)" : "none";
+        slider.style.transform = `translateX(${-i * slideWidth}px)`;
+    }
+
+    rightArrow.addEventListener("click", () => {
+        index++;
+        goToSlide(index, true);
+        if (index >= slides.length) {
+            setTimeout(() => {
+                index = 0;
+                goToSlide(index, false);
+            }, 500);
+        }
+    });
+
+    leftArrow.addEventListener("click", () => {
+        if (index <= 0) {
+            index = slides.length;
+            goToSlide(index, false);
+            setTimeout(() => {
+                index--;
+                goToSlide(index, true);
+            }, 10);
+        } else {
+            index--;
+            goToSlide(index, true);
+        }
+    });
+
+    window.addEventListener("resize", () => goToSlide(index, false));
+
+    // --- 2. MAP RESTORATION ---
     const map = L.map('map').setView([40.0379, -76.3055], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
+        attribution: '© OpenStreetMap'
     }).addTo(map);
 
     const flowerIcon = L.icon({
-        iconUrl: "{{ url_for('static', filename='images/flower-pin.png') }}",
+        iconUrl: "{{ url_for('static', filename='images/icon.png') }}",
         iconSize: [48, 48],
         iconAnchor: [24, 48],
         popupAnchor: [0, -48]
@@ -88,81 +128,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<!-- 🌸 DASHBOARD-ONLY FOOTER -->
 <footer class="lux-footer">
     <div class="footer-socials">
-
-        <a href="https://www.instagram.com" target="_blank" class="footer-icon">
-            <img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram">
-        </a>
-
-        <a href="https://www.facebook.com" target="_blank" class="footer-icon">
-            <img src="{{ url_for('static', filename='images/facebook.png') }}" alt="Facebook">
-        </a>
-
-        <a href="https://www.tiktok.com" target="_blank" class="footer-icon">
-            <img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="TikTok">
-        </a>
-
+        <a href="#" class="footer-icon"><img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram"></a>
+        <a href="#" class="footer-icon"><img src="{{ url_for('static', filename='images/facebook.png') }}" alt="Facebook"></a>
+        <a href="#" class="footer-icon"><img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="TikTok"></a>
     </div>
-
     <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
 </footer>
-
-<!-- SLIDER SCRIPT -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const slider = document.getElementById("categorySlider");
-    const slides = slider.querySelectorAll(".slide");
-    const leftArrow = document.querySelector(".left-arrow");
-    const rightArrow = document.querySelector(".right-arrow");
-
-    let index = 0;
-    let slideWidth = slides[0].offsetWidth + 20;
-
-    function updateWidth() {
-        slideWidth = slides[0].offsetWidth + 20;
-        goToSlide(index, false);
-    }
-
-    window.addEventListener("resize", updateWidth);
-
-    function setActiveSlide(i) {
-        slides.forEach(s => s.classList.remove("active"));
-        slides[i].classList.add("active");
-    }
-
-    function goToSlide(i, animate = true) {
-        slider.style.transition = animate ? "transform 0.4s ease" : "none";
-        slider.style.transform = `translateX(${-i * slideWidth}px)`;
-        setActiveSlide(i);
-    }
-
-    function nextSlide() {
-        if (index === slides.length - 1) {
-            index = 0;
-            goToSlide(index, true);
-        } else {
-            index++;
-            goToSlide(index);
-        }
-    }
-
-    function prevSlide() {
-        if (index === 0) {
-            index = slides.length - 1;
-            goToSlide(index, true);
-        } else {
-            index--;
-            goToSlide(index);
-        }
-    }
-
-    rightArrow.addEventListener("click", nextSlide);
-    leftArrow.addEventListener("click", prevSlide);
-
-    setActiveSlide(0);
-});
-</script>
 
 {% endblock %}
