@@ -14,8 +14,9 @@ textarea:hover,
 /* cursor and pointer */
 
 body {
-    background: linear-gradient(180deg, #FAF9F6, #FAF9F6); 
+    /* background: linear-gradient(180deg, #FAF9F6, #FAF9F6);  */
     color: #4A3F35;
+    background-color: #f1fef6;
     font-family:"Autour One", system-ui;
     margin: 0;
     padding: 0;
