@@ -62,6 +62,7 @@ def login():
         if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]  # revised
             session["user_name"] = user["first_name"]  # revised
+            session["is_admin"] = user["is_admin"]  # revised
 
             if user["is_admin"] == 1:  # revised
                 return redirect(url_for("admin_dashboard"))
