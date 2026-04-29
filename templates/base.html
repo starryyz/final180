@@ -20,35 +20,42 @@
         </a>
     </div>
 
-    {% if request.endpoint != 'login' %}
     <div class="nav-right">
-        <span class="nav-link">
-            <a href="{{ url_for('dashboard') }}">Home</a>
-        </span>
-
-        <span class="nav-link">
-            <a href="#">Contact Us</a>
-        </span>
-
-        <span class="nav-link">
-            {% if session.get("user_id") %}
+        {% if request.endpoint == 'admin' %}
+            {# Minimal View: Only Logout and Profile Image #}
+            <span class="nav-link">
                 <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
-                <a href="{{ url_for('cart') }}">
-                    <ion-icon name="cart-outline"></ion-icon>
-                </a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
-            {% endif %}
-        </span>
-
-        <a href="{{ url_for('profile') }}" class="profile-btn">
-            <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
-                 class="profile-img">
-        </a>
+            </span>
+            
+            <a href="{{ url_for('profile') }}" class="profile-btn">
+                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
+                     class="profile-img">
+            </a>
+        {% elif request.endpoint != 'login' %}
+            {# Standard View: Home, Contact, Login/Logout, and Cart #}
+            <span class="nav-link">
+                <a href="{{ url_for('dashboard') }}">Home</a>
+            </span>
+            <span class="nav-link">
+                <a href="#">Contact Us</a>
+            </span>
+            <span class="nav-link">
+                {% if session.get("user_id") %}
+                    <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
+                    <a href="{{ url_for('cart') }}">
+                        <ion-icon name="cart-outline"></ion-icon>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                {% endif %}
+            </span>
+            <a href="{{ url_for('profile') }}" class="profile-btn">
+                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
+                     class="profile-img">
+            </a>
+        {% endif %}
     </div>
-    {% endif %}
 </nav>
-
 {% block content %}{% endblock %}
 </body>
 </html>

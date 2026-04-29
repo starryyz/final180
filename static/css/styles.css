@@ -232,7 +232,7 @@ ion-icon:hover {
     height: 110px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #d8c3a5;
+    border: 3px solid white;
     margin-bottom: 10px;
 }
 
@@ -244,34 +244,67 @@ ion-icon:hover {
     border: 1px solid #c9b8a6;
 }
 
-.save-btn {
+.logout-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+    align-items: center;     
+    gap: 20px;              
+    margin-top: 30px;
     width: 100%;
-    padding: 12px;
-    background: #d8c3a5;
+}
+
+.save-btn, .logout-btn, .back-btn {
+    font-family: "Autour One", system-ui;
+    font-size:16px;
+    color: white;
+    padding: 20px;
     border: none;
     border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
-}
-.logout-wrapper {
-    margin-top: 30px;
     text-align: center;
+    text-decoration: none;
+    display: inline-block;           
+    transition: 0.25s ease;
+}
+
+.save-btn {
+    width: 180px;
+    background: #6FAF73;
+}
+
+.save-btn:hover {
+    background: #527241;
+    transform: translateY(-2px);
+}
+
+.back-btn {
+    width: 90px;
+    background: #C56E4D;
+}
+
+.back-btn:hover {
+    background: rgb(187, 105, 72);
+    transform: translateY(-2px);
 }
 
 .logout-btn {
-    display: inline-block;
-    padding: 12px 20px;
-    background: #c97f7f; 
-    color: white;
-    border-radius: 10px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: 0.25s ease;
+    width: 90px;
+    background: #c97f7f;
+}
+
+.logout-btn:hover {
+    background: #b86f6f;
 }
 
 .logout-btn:hover {
     background: #b96c6c;
     transform: translateY(-2px);
+}
+
+input[type="text"] {
+    outline:none;
 }
 
 .item-grid {
