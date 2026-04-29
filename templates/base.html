@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Blooming Seeds</title>
+
+    <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="icon" type="image/x-icon" href="static/images/icon.png">
-<link href="https://fonts.googleapis.com/css2?family=Autour+One&family=DynaPuff:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/x-icon" href="static/images/icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Autour+One&family=DynaPuff:wght@400..700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+
 <nav class="lux-nav">
     <div class="nav-left">
         <a href="{{ url_for('dashboard') }}">
@@ -21,34 +25,39 @@
     </div>
 
     <div class="nav-right">
+
         {% if request.endpoint == 'admin' %}
-            {# Minimal View: Only Logout and Profile Image #}
             <span class="nav-link">
                 <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
             </span>
-            
+
             <a href="{{ url_for('profile') }}" class="profile-btn">
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
+
         {% elif request.endpoint != 'login' %}
-            {# Standard View: Home, Contact, Login/Logout, and Cart #}
             <span class="nav-link">
                 <a href="{{ url_for('dashboard') }}">Home</a>
             </span>
+
             <span class="nav-link">
                 <a href="#">Contact Us</a>
             </span>
+
             <span class="nav-link">
                 {% if session.get("user_id") %}
                     <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
-                    <a href="{{ url_for('cart') }}">
+
+                    <!-- CART ICON (TOGGLE PANEL) -->
+                    <a id="cart-icon" href="javascript:void(0)">
                         <ion-icon name="cart-outline"></ion-icon>
                     </a>
                 {% else %}
                     <a href="{{ url_for('login') }}">Login</a>
                 {% endif %}
             </span>
+
             <a href="{{ url_for('profile') }}" class="profile-btn">
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
@@ -56,6 +65,57 @@
         {% endif %}
     </div>
 </nav>
+
+
+<!-- ⭐ SLIDE-OUT CART PANEL ⭐ -->
+<div id="cart-panel" class="cart-panel">
+    <div class="cart-header">
+        <h2>Your Cart</h2>
+        <button id="close-cart" class="close-btn">&times;</button>
+    </div>
+
+    <div class="cart-items">
+        {% if session.get('cart') %}
+            {% for item_id, item in session['cart'].items() %}
+                <div class="cart-item">
+                    <span>{{ item['name'] }}</span>
+                    <span>${{ item['price'] }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty">Your cart is empty</p>
+        {% endif %}
+    </div>
+
+    <div class="cart-footer">
+        <a href="{{ url_for('dashboard') }}" class="cart-btn">Continue Shopping</a>
+        <a href="{{ url_for('checkout') }}" class="checkout-btn">Go to Checkout</a>
+    </div>
+</div>
+
+
 {% block content %}{% endblock %}
+
+
+<!-- ⭐ CART TOGGLE SCRIPT ⭐ -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const cartPanel = document.getElementById("cart-panel");
+    const cartIcon = document.getElementById("cart-icon");
+    const closeCart = document.getElementById("close-cart");
+
+    if (cartIcon) {
+        cartIcon.addEventListener("click", () => {
+            cartPanel.classList.toggle("open");
+        });
+    }
+
+    closeCart.addEventListener("click", () => {
+        cartPanel.classList.remove("open");
+    });
+});
+</script>
+
 </body>
 </html>
+
