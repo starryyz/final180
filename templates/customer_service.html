@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="customer-service-container">
+
+    <h1 class="cs-title">Customer Service</h1>
+    <p class="cs-subtitle">We're here to help you grow with confidence.</p>
+
+    <!-- CONTACT INFO -->
+    <section class="cs-section">
+        <h2>Contact Us</h2>
+        <p>If you need assistance, feel free to reach out anytime.</p>
+
+        <div class="cs-contact-box">
+            <ion-icon name="mail-outline" class="cs-icon"></ion-icon>
+            <span class="cs-email">bloomyseeds@gmail.com</span>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="cs-section">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+            <h3>How long does shipping take?</h3>
+            <p>Most orders are processed within 1–2 business days and arrive within 3–7 days depending on your location.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Can I return or exchange an item?</h3>
+            <p>Yes! We accept returns within 14 days of delivery as long as the item is unused and in its original packaging.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>What if my plant arrives damaged?</h3>
+            <p>We guarantee healthy delivery. If your plant arrives damaged, send us a photo and we’ll replace it for free.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>Do you offer care instructions?</h3>
+            <p>Absolutely. Each plant includes care instructions, and our BlooomyBot page can help answer plant‑care questions.</p>
+        </div>
+
+        <div class="faq-item">
+            <h3>How do I track my order?</h3>
+            <p>Once your order ships, you’ll receive an email with a tracking link.</p>
+        </div>
+    </section>
+
+</div>
+<!-- 🌱 BLOOMYBOT FLOATING ICON -->
+<div id="bloomybot-icon">
+    <img src="{{ url_for('static', filename='images/bloomybot.jpeg') }}" alt="BloomyBot">
+</div>
+
+<!-- 🌱 BLOOMYBOT SLIDE-OUT PANEL -->
+<div id="bloomybot-panel">
+    <div class="bloomybot-header">
+        <h3>BloomyBot</h3>
+        <span id="bloomybot-close">&times;</span>
+    </div>
+
+    <div id="bloomybot-messages"></div>
+
+    <div class="bloomybot-input-area">
+        <input type="text" id="bloomybot-input" placeholder="Ask me anything...">
+        <button id="bloomybot-send">Send</button>
+    </div>
+</div>
+
+<style>
+    .customer-service-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+        font-family: "Autour One", system-ui;
+    
+    }
+
+    .cs-title {
+        text-align: center;
+        font-size: 42px;
+        margin-bottom: 5px;
+        color: #2d5a27;
+        font-family: "Autour One", system-ui;
+    }
+
+    .cs-subtitle {
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 40px;
+        color: #444;
+        font-family: "Autour One", system-ui;
+    }
+
+    .cs-section {
+        margin-bottom: 40px;
+
+    }
+
+    .cs-section h2 {
+        font-size: 28px;
+        color: #2d5a27;
+        margin-bottom: 15px;
+    }
+
+    /* ⭐ Shared card styling (FAQ + Contact box) */
+    .faq-item,
+    .cs-contact-box {
+       background-color: oklab(94.96% 0.01258 -0.00455);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 5px solid #2d5a27;
+        font-family: "Autour One", system-ui;
+
+        /* ⭐ Hover animation */
+        transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            background-color 0.25s ease;
+    }
+
+    /* ⭐ Hover pop-out effect */
+    .faq-item:hover,
+    .cs-contact-box:hover {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        background-color: #ffffff;
+    }
+
+    .faq-item h3 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .faq-item p {
+        margin: 0;
+        color: #555;
+    }
+
+    .cs-contact-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #e8f5e9;
+    }
+
+    .cs-icon {
+        font-size: 24px;
+        color: #2d5a27;
+    }
+
+    .cs-email {
+        font-size: 18px;
+        color: #2d5a27;
+        font-weight: bold;
+        font-family: "Autour One", system-ui;
+    }
+
+    /* Footer styles (unchanged) */
+    .lux-footer {
+        margin-top: 60px;
+        padding: 30px 20px;
+        text-align: center;
+        background: linear-gradient(180deg, #fef9f5, #fef9f5);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+        border-radius: 20px 20px 0 0;
+    }
+
+    .footer-socials {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 15px;
+    }
+
+    .footer-icon img {
+        width: 45px;
+        height: 45px;
+        transition: 0.25s ease;
+    }
+
+    .footer-icon img:hover {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+
+    .footer-copy {
+        font-size: 0.9rem;
+        color: #4A3F35;
+        font-weight: 500;
+    }
+
+    /* 🌱 BLOOMYBOT ICON */
+#bloomybot-icon {
+    position: fixed;
+    left: 20px;
+    bottom: 30px;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    z-index: 9999;
+    transition: transform 0.25s ease;
+}
+
+#bloomybot-icon img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+#bloomybot-icon:hover {
+    transform: scale(1.08);
+}
+
+/* 🌱 SLIDE-OUT PANEL */
+#bloomybot-panel {
+    position: fixed;
+    left: -350px;
+    bottom: 0;
+    width: 350px;
+    height: 500px;
+    background: #ffffff;
+    border-right: 4px solid #2d5a27;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    border-radius: 0 10px 0 0;
+    display: flex;
+    flex-direction: column;
+    transition: left 0.35s ease;
+    z-index: 99999;
+    font-family: "Autour One", system-ui;
+}
+
+/* 🌱 HEADER */
+.bloomybot-header {
+    background: #2d5a27;
+    color: white;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#bloomybot-close {
+    cursor: pointer;
+    font-size: 22px;
+}
+
+/* 🌱 MESSAGES */
+#bloomybot-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.bot-msg, .user-msg {
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.bot-msg {
+    background: #e8f5e9;
+    border-left: 4px solid #2d5a27;
+}
+
+.user-msg {
+    background: #d1e7ff;
+    border-right: 4px solid #1b4d89;
+    margin-left: auto;
+}
+
+/* 🌱 INPUT AREA */
+.bloomybot-input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+#bloomybot-input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+#bloomybot-send {
+    margin-left: 8px;
+    padding: 8px 12px;
+    background: #2d5a27;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+</style>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const icon = document.getElementById("bloomybot-icon");
+    const panel = document.getElementById("bloomybot-panel");
+    const closeBtn = document.getElementById("bloomybot-close");
+    const sendBtn = document.getElementById("bloomybot-send");
+    const input = document.getElementById("bloomybot-input");
+    const messages = document.getElementById("bloomybot-messages");
+
+    // 🌱 OPEN PANEL
+    icon.addEventListener("click", () => {
+        panel.style.left = "0px";
+    });
+
+    // 🌱 CLOSE PANEL
+    closeBtn.addEventListener("click", () => {
+        panel.style.left = "-350px";
+    });
+
+    // 🌱 SEND MESSAGE FUNCTION (REAL BACKEND)
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        // Add user message to chat
+        messages.innerHTML += `<div class="user-msg">${text}</div>`;
+        input.value = "";
+        messages.scrollTop = messages.scrollHeight;
+
+        // 🌱 Send message to backend
+        fetch("/chatbot_api", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ message: text })
+        })
+        .then(res => res.json())
+        .then(data => {
+            messages.innerHTML += `<div class="bot-msg">${data.response}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        })
+        .catch(err => {
+            messages.innerHTML += `<div class="bot-msg">Oops! Something went wrong.</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        });
+    }
+
+    // 🌱 BUTTON CLICK SEND
+    sendBtn.addEventListener("click", sendMessage);
+
+    // 🌱 ENTER KEY SEND
+    input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+    });
+
+});
+</script>
+
+
+{% endblock %}
+

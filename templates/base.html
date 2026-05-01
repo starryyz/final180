@@ -42,17 +42,19 @@
             </span>
 
             <span class="nav-link">
-                <a href="#">Contact Us</a>
+                <a href="{{ url_for('customer_service') }}">Contact Us</a>
             </span>
 
             <span class="nav-link">
                 {% if session.get("user_id") %}
-                    <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
 
-                    <!-- CART ICON (TOGGLE PANEL) -->
-                    <a id="cart-icon" href="javascript:void(0)">
-                        <ion-icon name="cart-outline"></ion-icon>
-                    </a>
+                    {% if request.endpoint != 'checkout' %}
+                        <!-- CART ICON (TOGGLE PANEL) -->
+                        <a id="cart-icon" href="javascript:void(0)">
+                            <ion-icon name="cart-outline"></ion-icon>
+                        </a>
+                    {% endif %}
+
                 {% else %}
                     <a href="{{ url_for('login') }}">Login</a>
                 {% endif %}
@@ -97,6 +99,28 @@
 {% block content %}{% endblock %}
 
 
+<!-- ⭐ FOOTER ⭐ -->
+<footer class="lux-footer">
+    <div class="footer-socials">
+
+        <a href="https://www.instagram.com" target="_blank" class="footer-icon">
+            <img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram">
+        </a>
+
+        <a href="https://www.facebook.com" target="_blank" class="footer-icon">
+            <img src="{{ url_for('static', filename='images/facebook.png') }}" alt="Facebook">
+        </a>
+
+        <a href="https://www.tiktok.com" target="_blank" class="footer-icon">
+            <img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="TikTok">
+        </a>
+
+    </div>
+
+    <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
+</footer>
+
+
 <!-- ⭐ CART TOGGLE SCRIPT ⭐ -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -118,4 +142,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 

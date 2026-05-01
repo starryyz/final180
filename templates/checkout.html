@@ -1,19 +1,166 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Checkout</h2>
-<form method="POST">
-    <label>Pickup or Delivery?</label>
-    <select name="pickup_option">
-        <option value="delivery">Delivery</option>
-        <option value="pickup">Pickup in store</option>
-    </select>
 
-    <!-- Payment form could be expanded later -->
-    <p>Payment details (mock):</p>
-    <input type="text" placeholder="Card Number">
-    <input type="text" placeholder="Expiration">
-    <input type="text" placeholder="CVV">
+<style>
 
-    <button type="submit">Place Order</button>
-</form>
+/* ⭐ WRAP ALL CHECKOUT STYLES IN A NAMESPACE TO PREVENT CART OVERRIDES ⭐ */
+.checkout-page * {
+    box-sizing: border-box;
+}
+
+/* ⭐ All checkout styles now apply ONLY inside .checkout-page ⭐ */
+
+.checkout-page .checkout-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.checkout-page .checkout-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 25px;
+    color: #4a6b4f;
+}
+
+.checkout-page .checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.checkout-page .checkout-box {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.checkout-page .checkout-box h3 {
+    margin-bottom: 15px;
+    color: #4a6b4f;
+}
+
+.checkout-page .order-items {
+    list-style: none;
+    padding: 0;
+}
+
+.checkout-page .order-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.checkout-page .checkout-input,
+.checkout-page .checkout-select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+}
+
+.checkout-page .checkout-btn {
+    width: 100%;
+    padding: 14px;
+    background: #7bbf72;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.checkout-page .checkout-btn:hover {
+    background: #6aac64;
+}
+
+</style>
+
+<!-- ⭐ WRAP ALL CHECKOUT HTML IN THE SAME NAMESPACE ⭐ -->
+<div class="checkout-page">
+
+    <div class="checkout-container">
+
+        <h2 class="checkout-title">Checkout</h2>
+
+        <div class="checkout-grid">
+
+            <!-- LEFT: ORDER SUMMARY -->
+            <div class="checkout-box">
+                <h3>Your Order</h3>
+
+                {% if session.cart %}
+                    <ul class="order-items">
+                        {% for pid, qty in session.cart.items() %}
+                            <li class="order-item">
+                                <strong>Product #{{ pid }}</strong><br>
+                                <span>Qty: {{ qty }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Your cart is empty.</p>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT: CHECKOUT FORM -->
+            <form method="POST" class="checkout-box">
+
+                <h3>Pickup or Delivery</h3>
+                <select name="pickup_option" class="checkout-select">
+                    <option value="delivery">Delivery</option>
+                    <option value="pickup">Pickup in store</option>
+                </select>
+
+                <h3>Payment Details</h3>
+                <input type="text" placeholder="Card Number" class="checkout-input">
+                <input type="text" placeholder="Expiration (MM/YY)" class="checkout-input">
+                <input type="text" placeholder="CVV" class="checkout-input">
+
+                <h3>Or Pay With</h3>
+
+<div style="display:flex; gap:15px; margin-bottom:20px;">
+
+    <!-- APPLE PAY -->
+    <button type="button" onclick="window.location.href='{{ url_for('order_confirmation') }}'"
+        style="
+            flex:1;
+            padding:12px;
+            background:#000;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+        ">
+        <img src="{{ url_for('static', filename='images/applepay.jpg') }}" 
+             alt="Apple Pay" style="width:100%; max-height:40px; object-fit:contain;">
+    </button>
+
+    <!-- GOOGLE PAY -->
+    <button type="button" onclick="window.location.href='{{ url_for('order_confirmation') }}'"
+        style="
+            flex:1;
+            padding:12px;
+            background:#fff;
+            border:1px solid #ccc;
+            border-radius:8px;
+            cursor:pointer;
+        ">
+        <img src="{{ url_for('static', filename='images/googlepay.webp') }}" 
+             alt="Google Pay" style="width:100%; max-height:40px; object-fit:contain;">
+    </button>
+
+</div>
+
+
+                <button type="submit" class="checkout-btn">Place Order</button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
 {% endblock %}

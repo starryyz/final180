@@ -13,44 +13,23 @@
 <h2 class="category-title">{{ category_name.title() }}</h2>
 
 <div class="card-grid">
-    {% for item in items %}
-    <div class="item-card">
-        <img src="{{ url_for('static', filename='images/' + category_slug.replace(' ', '-') + '.png') }}" alt="{{ category }}">
-        <h3>{{ item.name }}</h3>
-    </div>
-    {% endfor %}
+    {% if products %}
+        {% for item in products %}
+        <div class="item-card">
+            <img src="{{ item.image_url }}" alt="{{ item.name }}">
+            <h3>{{ item.name }}</h3>
+            <p>${{ item.price }}</p>
+            <p>{{ item.description }}</p>
+
+            <form action="{{ url_for('add_to_cart', product_id=item.id) }}" method="POST">
+                <input type="number" name="quantity" value="1" min="1" max="{{ item.stock }}">
+                <button type="submit" class="add-btn">Add to Cart</button>
+            </form>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No products in this category yet.</p>
+    {% endif %}
 </div>
-<div class="item-grid">
-
-    <!-- Placeholder Card 1 -->
-    <div class="item-card">
-        <div class="item-image placeholder"></div>
-        <h3 class="item-title">Coming Soon</h3>
-        <p class="item-desc">This item will be added soon.</p>
-    </div>
-
-    <!-- Placeholder Card 2 -->
-    <div class="item-card">
-        <div class="item-image placeholder"></div>
-        <h3 class="item-title">Coming Soon</h3>
-        <p class="item-desc">This item will be added soon.</p>
-    </div>
-
-    <!-- Placeholder Card 3 -->
-    <div class="item-card">
-        <div class="item-image placeholder"></div>
-        <h3 class="item-title">Coming Soon</h3>
-        <p class="item-desc">This item will be added soon.</p>
-    </div>
-
-    <!-- Placeholder Card 4 -->
-    <div class="item-card">
-        <div class="item-image placeholder"></div>
-        <h3 class="item-title">Coming Soon</h3>
-        <p class="item-desc">This item will be added soon.</p>
-    </div>
-
-</div>
-
 
 {% endblock %}

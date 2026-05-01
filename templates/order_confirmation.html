@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- 🌸 FLOWER CONFETTI CONTAINER -->
+<div id="flower-confetti"></div>
+
+<div style="
+    max-width: 750px;
+    margin: 60px auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    text-align: center;
+">
+
+    <img src="{{ url_for('static', filename='images/confirmation.png') }}"
+         alt="Order Confirmed"
+         style="width: 160px; margin-bottom: 25px;">
+
+    <h1 style="
+        font-size: 2.4rem;
+        color: #4a6b4f;
+        margin-bottom: 15px;
+        font-weight: 600;
+    ">
+        Your Order is Confirmed!
+    </h1>
+
+    <p style="
+        font-size: 1.2rem;
+        color: #555;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    ">
+        Thank you for supporting Blooming Seeds.  
+        Your order is being prepared with care.
+    </p>
+
+    <div style="
+        background: #f7f7f7;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 35px;
+        text-align: left;
+    ">
+        <h3 style="color:#4a6b4f; margin-bottom:10px;">Order Summary</h3>
+
+        <ul style="list-style:none; padding:0; margin-top:15px; color:#555;">
+            <li>• Order Number: <strong>{{ order_number }}</strong></li>
+            <li>• Status: <strong>Processing</strong></li>
+            <li>• Estimated Delivery: <strong>2–5 business days</strong></li>
+        </ul>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}"
+       style="
+            display:inline-block;
+            padding: 14px 26px;
+            background: #7bbf72;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: 0.2s ease;
+       "
+       onmouseover="this.style.background='#6aac64'"
+       onmouseout="this.style.background='#7bbf72'">
+        Return to Home
+    </a>
+
+</div>
+
+<!-- 🌸 FLOWER CONFETTI SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const confettiContainer = document.getElementById("flower-confetti");
+
+    for (let i = 0; i < 40; i++) {
+        const flower = document.createElement("div");
+        flower.classList.add("confetti-flower");
+        flower.style.left = Math.random() * 100 + "vw";
+        flower.style.animationDelay = Math.random() * 2 + "s";
+        flower.style.fontSize = (Math.random() * 20 + 14) + "px";
+        confettiContainer.appendChild(flower);
+    }
+});
+</script>
+
+<style>
+#flower-confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 9999;
+}
+
+.confetti-flower {
+    position: absolute;
+    top: -20px;
+    color: #ffb7d5;
+    animation: fall 4s linear infinite;
+}
+
+/* 🌸 Flower shape using Unicode blossom */
+.confetti-flower::before {
+    content: "❀";
+}
+
+@keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+}
+</style>
+
+{% endblock %}
+

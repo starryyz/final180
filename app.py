@@ -3,6 +3,9 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
+from flask import request, jsonify
+import random
+import datetime
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -129,6 +132,7 @@ def dashboard():
         return redirect(url_for("login"))
     return render_template("dashboard.html", user=user, categories=CATEGORIES)
 
+
 @app.route("/category/<category_name>")
 def category_page(category_name):
     user = current_user()
@@ -210,26 +214,28 @@ def checkout():
         return redirect(url_for("login"))
 
     cart = session.get("cart", {})
+
+    # Allow checkout page to load even if cart is empty
     if not cart:
         flash("Your cart is empty.", "warning")
-        return redirect(url_for("dashboard"))
+        return render_template("checkout.html", user=user)
 
     if request.method == "POST":
         pickup_option = request.form.get("pickup_option", "delivery")
 
-        conn = get_db_connection()  # revised
-        cur = conn.cursor()  # revised
+        conn = get_db_connection()
+        cur = conn.cursor()
 
         try:
             cur.execute("""
                 INSERT INTO orders (user_id, status, pickup_option)
                 VALUES (%s, 'pending', %s)
-            """, (user["id"], pickup_option))  # revised
+            """, (user["id"], pickup_option))
             order_id = cur.lastrowid
 
             for pid, qty in cart.items():
                 cur.execute("SELECT price FROM products WHERE id = %s", (pid,))
-                price = cur.fetchone()["price"]  # revised
+                price = cur.fetchone()["price"]
                 cur.execute("""
                     INSERT INTO order_items (order_id, product_id, quantity, price_each)
                     VALUES (%s, %s, %s, %s)
@@ -237,7 +243,7 @@ def checkout():
 
                 cur.execute("UPDATE products SET stock = stock - %s WHERE id = %s", (qty, pid))
 
-            conn.commit()  # revised
+            conn.commit()
             session["cart"] = {}
             flash("Order placed! You'll be notified when it's approved or shipped.", "success")
             return redirect(url_for("dashboard"))
@@ -251,6 +257,28 @@ def checkout():
             conn.close()
 
     return render_template("checkout.html", user=user)
+
+
+
+def generate_order_number():
+    now = datetime.datetime.now()
+    date_part = now.strftime("%Y%m%d")  # Example: 20260430
+    random_part = random.randint(1000, 9999)
+    return f"BS-{date_part}-{random_part}"
+
+# order confirmation route
+@app.route("/order_confirmation")
+def order_confirmation():
+    user = current_user()
+
+    order_number = generate_order_number()
+
+    return render_template(
+        "order_confirmation.html",
+        user=user,
+        order_number=order_number
+    )
+
 
 # admin routes
 
@@ -314,6 +342,29 @@ def admin_update_order_status(order_id):
 def bloomybot():
     user = current_user()
     return render_template("bloomybot.html", user=user)
+
+@app.route("/chatbot_api", methods=["POST"])
+def chatbot_api():
+    data = request.get_json()
+    user_message = data.get("message", "").strip()
+
+    if not user_message:
+        return jsonify({"response": "I didn’t catch that. Could you repeat it?"})
+
+    # 🌱 Simple placeholder logic (we will upgrade this)
+    if "refund" in user_message.lower():
+        bot_reply = "I can help with refunds! Please provide your order number."
+    else:
+        bot_reply = "I'm BloomyBot! I’ll soon be able to process refunds and notify admins."
+
+    return jsonify({"response": bot_reply})
+
+
+# ⭐⭐⭐ CUSTOMER SERVICE PAGE ⭐⭐⭐
+@app.route("/customer_service")
+def customer_service():
+    user = current_user()
+    return render_template("customer_service.html", user=user)
 
 
 # user profile
@@ -419,6 +470,8 @@ def profile():
 #     conn.close()
 #
 #     return "Admin user created. You can now log in."
+
+
 
 
 if __name__ == "__main__":
