@@ -1,29 +1,139 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Manage Orders</h2>
 
-<table>
-    <tr>
-        <th>ID</th><th>User</th><th>Status</th><th>Pickup</th><th>Created</th><th>Actions</th>
-    </tr>
-    {% for o in orders %}
-    <tr>
-        <td>{{ o.id }}</td>
-        <td>{{ o.first_name }} {{ o.last_name }}</td>
-        <td>{{ o.status }}</td>
-        <td>{{ o.pickup_option }}</td>
-        <td>{{ o.created_at }}</td>
-        <td>
-            <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o.id) }}">
-                <select name="status">
-                    <option value="approved">Approve</option>
-                    <option value="declined">Decline</option>
-                    <option value="shipped">Shipped</option>
-                </select>
-                <button type="submit">Update</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+<h2 class="page-title">Manage Orders</h2>
+
+<div class="orders-container">
+    <table class="orders-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Pickup</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for o in orders %}
+            <tr>
+                <td>{{ o.id }}</td>
+
+                <td>{{ o.first_name }} {{ o.last_name }}</td>
+
+                <td>
+                    <span class="status-badge {{ o.status }}">
+                        {{ o.status | capitalize }}
+                    </span>
+                </td>
+
+                <td>
+                    {% if o.pickup_option == "pickup" %}
+                        Pickup
+                    {% else %}
+                        Delivery
+                    {% endif %}
+                </td>
+
+                <td>{{ o.created_at }}</td>
+
+                <td>
+                    <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o.id) }}">
+                        <select name="status" class="status-select">
+                            <option value="approved">Approve</option>
+                            <option value="declined">Decline</option>
+                            <option value="shipped">Shipped</option>
+                        </select>
+
+                        <button type="submit" class="update-btn">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .page-title {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .orders-container {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+    .orders-table th {
+        background: #f4f6f9;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #34495e;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .orders-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .orders-table tr:hover {
+        background: #fafafa;
+    }
+
+    /* Status badges */
+    .status-badge {
+        padding: 6px 10px;
+        border-radius: 6px;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .status-badge.pending { background: #f0ad4e; }
+    .status-badge.approved { background: #0275d8; }
+    .status-badge.shipped { background: #5bc0de; }
+    .status-badge.ready_for_pickup { background: #5cb85c; }
+    .status-badge.completed { background: #4cae4c; }
+    .status-badge.declined { background: #d9534f; }
+
+    .status-select {
+        padding: 6px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #fff;
+    }
+
+    .update-btn {
+        padding: 6px 12px;
+        margin-left: 6px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .update-btn:hover {
+        background: #43a047;
+    }
+</style>
+
 {% endblock %}
+

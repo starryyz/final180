@@ -45,6 +45,13 @@
                 <a href="{{ url_for('customer_service') }}">Contact Us</a>
             </span>
 
+            <!-- ⭐ ORDER HISTORY LINK (added) ⭐ -->
+            <span class="nav-link">
+                {% if session.get("user_id") %}
+                    <a href="{{ url_for('my_orders') }}">Order History</a>
+                {% endif %}
+            </span>
+
             <span class="nav-link">
                 {% if session.get("user_id") %}
 
@@ -142,5 +149,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
 

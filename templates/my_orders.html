@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="page-title">My Orders</h2>
+
+{% if orders %}
+<div class="orders-list">
+
+    {% for o in orders %}
+    <div class="order-card">
+
+        <div class="order-header">
+            <h3>Order #{{ o.id }}</h3>
+            <span class="status-badge {{ o.status }}">
+                {{ o.status | replace("_", " ") | capitalize }}
+            </span>
+        </div>
+
+        <div class="order-details">
+            <p><strong>Total:</strong> ${{ "%.2f"|format(o.total) }}</p>
+
+            <p><strong>Pickup Option:</strong>
+                {% if o.pickup_option == "pickup" %}
+                    Pickup
+                {% else %}
+                    Delivery
+                {% endif %}
+            </p>
+
+            <p><strong>Placed On:</strong> {{ o.created_at }}</p>
+        </div>
+
+        <!-- ⭐ TRACK ORDER PROGRESS BAR ⭐ -->
+        <div class="progress-container">
+
+            <div class="progress-step {% if o.status in ['pending','approved','shipped','completed','ready_for_pickup'] %}active{% endif %}">
+                Pending
+            </div>
+
+            <div class="progress-step {% if o.status in ['approved','shipped','completed','ready_for_pickup'] %}active{% endif %}">
+                Approved
+            </div>
+
+            <div class="progress-step {% if o.status in ['shipped','completed','ready_for_pickup'] %}active{% endif %}">
+                Shipped
+            </div>
+
+            <div class="progress-step {% if o.status == 'completed' %}active{% endif %}">
+                Completed
+            </div>
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="empty-state">
+    <div class="empty-icon">🛒</div>
+    <p class="no-orders">You have no orders yet.</p>
+
+    <a href="{{ url_for('dashboard') }}" class="start-shopping-btn">
+        Start Shopping
+    </a>
+</div>
+
+{% endif %}
+
+<style>
+    .page-title {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        padding-left: 20px;
+    }
+
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .order-card {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border-left: 5px solid #8bc34a;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .order-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #34495e;
+    }
+
+    .order-details p {
+        margin: 6px 0;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    /* ⭐ PROGRESS BAR ⭐ */
+    .progress-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding: 15px 10px;
+        background: #f7f7f7;
+        border-radius: 10px;
+    }
+
+    .progress-step {
+        width: 24%;
+        text-align: center;
+        padding: 8px 0;
+        border-radius: 6px;
+        background: #ddd;
+        color: #555;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: 0.3s ease;
+    }
+
+    .progress-step.active {
+        background: #8bc34a;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* ⭐ EMPTY STATE ⭐ */
+    .empty-state {
+        margin-top: 40px;
+        text-align: center;
+        padding-left: 40px;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        opacity: 0.8;
+    }
+
+    .no-orders {
+        font-size: 1.2rem;
+        color: #777;
+        margin-bottom: 20px;
+    }
+
+    .start-shopping-btn {
+        display: inline-block;
+        background: #8bc34a;
+        color: white;
+        padding: 12px 22px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    .start-shopping-btn:hover {
+        background: #7ab03f;
+        transform: translateY(-2px);
+    }
+
+    /* Status badges */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .status-badge.pending { background: #f0ad4e; }
+    .status-badge.approved { background: #0275d8; }
+    .status-badge.shipped { background: #5bc0de; }
+    .status-badge.ready_for_pickup { background: #5cb85c; }
+    .status-badge.completed { background: #4cae4c; }
+    .status-badge.declined { background: #d9534f; }
+
+    /* ⭐ Footer stays at bottom ⭐ */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .lux-footer {
+        margin-top: auto;
+    }
+</style>
+
+{% endblock %}
