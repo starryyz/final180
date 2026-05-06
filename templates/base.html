@@ -35,7 +35,7 @@
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
-
+        
         {% elif request.endpoint != 'login' %}
             <span class="nav-link">
                 <a href="{{ url_for('dashboard') }}">Home</a>
@@ -45,7 +45,7 @@
                 <a href="{{ url_for('customer_service') }}">Contact Us</a>
             </span>
 
-            <!-- ⭐ ORDER HISTORY LINK (added) ⭐ -->
+            <!-- Order history -->
             <span class="nav-link">
                 {% if session.get("user_id") %}
                     <a href="{{ url_for('my_orders') }}">Order History</a>

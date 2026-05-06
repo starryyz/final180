@@ -55,15 +55,6 @@ def is_admin():
     user = current_user()
     return user and user["is_admin"] == 1
 
-@app.route("/vendor_dashboard")
-def vendor_dashboard():
-    user = current_user()
-    if not user:
-        return redirect(url_for("login"))
-    if session.get("role") != "vendor":
-        return redirect(url_for("dashboard"))
-    return render_template("vendor_dashboard.html", user=user)
-
 # login
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -89,7 +80,7 @@ def login():
                 return redirect(url_for("admin_dashboard"))
 
             if user["role"] == "vendor":
-                return redirect(url_for("vendor_dashboard"))
+                return redirect(url_for("/"))
             return redirect(url_for("dashboard"))
 
         else:
