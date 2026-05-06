@@ -470,6 +470,7 @@ def profile():
         conn.commit()
         cur.close()
         conn.close()
+        
 
         # session update
         session["user_name"] = first_name
@@ -544,7 +545,12 @@ def profile():
 #     return "Admin user created. You can now log in."
 
 
+<<<<<<< HEAD
 print("Hello World")
+=======
+
+print("hello world")
+>>>>>>> e7d293f93b80585da80ff8344315a57cbca74fd7
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
