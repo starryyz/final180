@@ -466,6 +466,7 @@ def profile():
         conn.commit()
         cur.close()
         conn.close()
+        
 
         # session update
         session["user_name"] = first_name
@@ -541,6 +542,7 @@ def profile():
 
 
 
+print("hello world")
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
