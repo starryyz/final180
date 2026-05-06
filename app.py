@@ -1,4 +1,5 @@
 # app.py
+
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -543,7 +544,7 @@ def profile():
 #     return "Admin user created. You can now log in."
 
 
-
+print("Hello World")
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

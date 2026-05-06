@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Succulent Catalog</title>
+
+<style>
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 30px 0 10px;
+    margin: 0;
+    font-size: 2.4rem;
+    letter-spacing: 1px;
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.8rem;
+    color: #2a2a2a;
+  }
+
+  .category {
+    width: 90%;
+    max-width: 1300px;
+    margin: 0 auto 60px;
+  }
+
+  .catalog {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-top: 25px;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  }
+
+  .item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #ddd;
+    margin-bottom: 14px;
+  }
+
+  .item h3 {
+    margin: 12px 0 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .item p {
+    flex: 1;
+    margin: 0 0 14px;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.3rem;
+  }
+
+  .add-to-cart {
+    margin-top: auto;
+    width: 100%;
+    background: #2a9d8f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s ease;
+  }
+
+  .add-to-cart:hover {
+    background: #21867a;
+  }
+
+  .view-cart-button {
+    background: #264653;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 16px 18px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.2s ease;
+    font-weight: 500;
+    margin: 0;
+    height: auto;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .view-cart-button:hover {
+    background: #1f3d45;
+  }
+
+  .cart-panel {
+    position: fixed;
+    top: 54px;
+    right: 0;
+    width: 320px;
+    max-height: calc(100vh - 54px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 0;
+    padding: 18px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    display: none;
+    z-index: 998;
+  }
+
+  .cart-panel.open {
+    display: block;
+  }
+
+  .cart-panel h3 {
+    margin: 0 0 12px;
+    font-size: 1.2rem;
+  }
+
+  .cart-panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cart-panel li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cart-panel li:last-child {
+    border-bottom: none;
+  }
+
+  .cart-panel .item-count {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .cart-panel .clear-cart {
+    margin-top: 14px;
+    width: 100%;
+    background: #e76f51;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .cart-panel .checkout-link {
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+    background: #2a9d8f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .cart-panel .checkout-link:hover {
+    background: #21867a;
+  }
+
+  .cart-panel .clear-cart:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  nav {
+    background: #264653;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+  }
+
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 16px 18px;
+    display: inline-block;
+    transition: background 0.2s ease;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    background: #1f3d45;
+  }
+
+  nav a.active {
+    background: #2a9d8f;
+  }
+
+  .nav-links {
+    display: flex;
+    flex: 1;
+  }
+
+  .view-cart-button {
+    background: #264653;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 16px 18px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.2s ease;
+    font-weight: 500;
+    margin: 0;
+    height: auto;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .view-cart-button:hover {
+    background: #1f3d45;
+  }
+
+</style>
+
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-links">
+    <a href="seeds.html" class="nav-link">Seeds</a>
+    <a href="succulents.html" class="nav-link active">Succulents</a>
+    <a href="pre_potted_plants.html" class="nav-link">Pre-Potted Plants</a>
+    <a href="soil.html" class="nav-link">Soil</a>
+    <a href="gardening_tools.html" class="nav-link">Gardening Tools</a>
+    <a href="pots.html" class="nav-link">Pots & Planters</a>
+    <a href="watering_cans.html" class="nav-link">Watering Cans</a>
+  </div>
+  <button class="view-cart-button" id="view-cart-button">View Cart (0)</button>
+</nav>
+
+<h1>Succulent Catalog</h1>
+<div class="cart-panel" id="cart-panel" aria-live="polite">
+  <h3>Shopping Cart</h3>
+  <ul id="cart-items"></ul>
+  <button class="clear-cart" id="clear-cart" type="button">Clear Cart</button>
+  <button class="checkout-link" type="button">Checkout</button>
+</div>
+<div class="category" id="succulents">
+  <h2>Succulents</h2>
+  <div class="catalog">
+
+    <div class="item"><img src="images_succulents/aeonium 'kiwi'.jpg"><h3>Aeonium 'Kiwi'</h3><p>Tri‑colored rosettes with bright pink edges.</p></div>
+    <div class="item"><img src="images_succulents/aeonium 'zwartkop' (Black Rose).jpg"><h3>Aeonium 'Zwartkop' (Black Rose)</h3><p>Dark burgundy rosettes on tall stems.</p></div>
+    <div class="item"><img src="images_succulents/aloe vera.jpg"><h3>Aloe Vera</h3><p>Iconic medicinal succulent with tall, spiky leaves.</p></div>
+    <div class="item"><img src="images_succulents/jade plant.jpg"><h3>Crassula ovata (Jade Plant)</h3><p>Classic houseplant with thick, glossy leaves.</p></div>
+    <div class="item"><img src="images_succulents/crassula ovata.jpg"><h3>Crassula ovata 'Gollum'</h3><p>Finger‑shaped leaves with a unique tubular look.</p></div>
+    <div class="item"><img src="images_succulents/crassula perforata.jpg"><h3>Crassula perforata (String of Buttons)</h3><p>Stacked, geometric leaves that spiral upward.</p></div>
+    <div class="item"><img src="images_succulents/echeveria.jpg"><h3>Echeveria 'Lola'</h3><p>Soft pastel rosette, very popular for arrangements.</p></div>
+    <div class="item"><img src="images_succulents/echeveria 'perle von nurnberg'.jpg"><h3>Echeveria 'Perle von Nürnberg'</h3><p>Lavender‑pink rosette with powdery leaves.</p></div>
+    <div class="item"><img src="images_succulents/echveria elegans (mexican snowball).jpeg"><h3>Echeveria elegans (Mexican Snowball)</h3><p>Compact, pale rosette that forms tidy clusters.</p></div>
+    <div class="item"><img src="images_succulents/gasteria 'little warty'.jpg"><h3>Gasteria 'Little Warty'</h3><p>Chunky leaves with speckled patterns and texture.</p></div>
+    <div class="item"><img src="images_succulents/graptopetalum paraguayense.jpg"><h3>Graptopetalum paraguayense (Ghost Plant)</h3><p>Pale, pastel rosettes that change color in sun.</p></div>
+    <div class="item"><img src="images_succulents/graptoveria 'debbie'.jpg"><h3>Graptoveria 'Debbie'</h3><p>Pink‑lavender hybrid rosette, very photogenic.</p></div>
+    <div class="item"><img src="images_succulents/haworthia cooperi.jpg"><h3>Haworthia cooperi</h3><p>Translucent, bubble‑like leaves that glow in light.</p></div>
+    <div class="item"><img src="images_succulents/haworthia fasciata (zebra plant).jpg"><h3>Haworthia fasciata (Zebra Plant)</h3><p>Striped, low‑light succulent perfect for desks.</p></div>
+    <div class="item"><img src="images_succulents/pachyphytum oviferum (moonstones).jpg"><h3>Pachyphytum oviferum (Moonstones)</h3><p>Round, pastel leaves that look like smooth stones.</p></div>
+    <div class="item"><img src="images_succulents/sedum morganianum (burro tail).jpeg"><h3>Sedum morganianum (Burro's Tail)</h3><p>Thick trailing stems covered in plump leaves.</p></div>
+    <div class="item"><img src="images_succulents/senecio radicans (string of bananas).jpg"><h3>Senecio radicans (String of Bananas)</h3><p>Fast‑growing trailing succulent with curved leaves.</p></div>
+    <div class="item"><img src="images_succulents/curio rowleyanus (string of pearls).jpg"><h3>Senecio rowleyanus (String of Pearls)</h3><p>Trailing succulent with bead‑like leaves.</p></div>
+    <div class="item"><img src="images_succulents/sempervivum arachnoideum.jpg"><h3>Sempervivum arachnoideum</h3><p>Rosettes covered in fine, web‑like threads.</p></div>
+    <div class="item"><img src="images_succulents/sempervivum tectorum (Hens and chicks).jpg"><h3>Sempervivum tectorum (Hens & Chicks)</h3><p>Hardy rosettes that multiply quickly outdoors.</p></div>
+
+  </div>
+  </div>
+
+  <script>
+    function getCart() {
+      const stored = localStorage.getItem('garden_cart');
+      return stored ? JSON.parse(stored) : {};
+    }
+
+    function saveCart(cartData) {
+      localStorage.setItem('garden_cart', JSON.stringify(cartData));
+    }
+
+    let cart = getCart();
+    const viewCartButton = document.getElementById('view-cart-button');
+    const cartPanel = document.getElementById('cart-panel');
+    const cartItems = document.getElementById('cart-items');
+    const clearCartButton = document.getElementById('clear-cart');
+
+    function updateCartButton() {
+      const total = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+      viewCartButton.textContent = `View Cart (${total})`;
+    }
+
+    function renderCart() {
+      cartItems.innerHTML = '';
+      const entries = Object.entries(cart);
+
+      if (!entries.length) {
+        const emptyMessage = document.createElement('li');
+        emptyMessage.textContent = 'Your cart is empty.';
+        cartItems.appendChild(emptyMessage);
+        clearCartButton.disabled = true;
+        return;
+      }
+
+      clearCartButton.disabled = false;
+
+      entries.forEach(([name, qty]) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${name}</span><span class="item-count">x${qty}</span>`;
+        cartItems.appendChild(li);
+      });
+    }
+
+    function addToCart(name) {
+      cart[name] = (cart[name] || 0) + 1;
+      saveCart(cart);
+      updateCartButton();
+      renderCart();
+    }
+
+    document.querySelectorAll('.item').forEach((item) => {
+      const title = item.querySelector('h3')?.textContent?.trim() || 'Seed Item';
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'add-to-cart';
+      button.textContent = 'Add to cart';
+
+      button.addEventListener('click', () => {
+        addToCart(title);
+        button.textContent = 'Added';
+        setTimeout(() => {
+          button.textContent = 'Add to cart';
+        }, 900);
+      });
+
+      item.appendChild(button);
+    });
+
+    viewCartButton.addEventListener('click', () => {
+      cartPanel.classList.toggle('open');
+    });
+
+    clearCartButton.addEventListener('click', () => {
+      cart = {};
+      saveCart(cart);
+      updateCartButton();
+      renderCart();
+    });
+
+    function setActiveNav() {
+      const currentPage = window.location.pathname.split('/').pop() || 'succulents.html';
+      document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    }
+
+    updateCartButton();
+    renderCart();
+    setActiveNav();
+  </script>
+</body>
+</html>

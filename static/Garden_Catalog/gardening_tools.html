@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gardening Tools Catalog</title>
+
+<style>
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 30px 0 10px;
+    margin: 0;
+    font-size: 2.4rem;
+    letter-spacing: 1px;
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.8rem;
+    color: #2a2a2a;
+  }
+
+  .category {
+    width: 90%;
+    max-width: 1300px;
+    margin: 0 auto 60px;
+  }
+
+  .catalog {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-top: 25px;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  }
+
+  .item img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #ddd;
+    margin-bottom: 14px;
+  }
+
+  .item h3 {
+    margin: 12px 0 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .item p {
+    flex: 1;
+    margin: 0 0 14px;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.3rem;
+  }
+
+  .add-to-cart {
+    margin-top: auto;
+    width: 100%;
+    background: #2a9d8f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s ease;
+  }
+
+  .add-to-cart:hover {
+    background: #21867a;
+  }
+
+  .view-cart-button {
+    background: #264653;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 16px 18px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.2s ease;
+    font-weight: 500;
+    margin: 0;
+    height: auto;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .view-cart-button:hover {
+    background: #1f3d45;
+  }
+
+  .cart-panel {
+    position: fixed;
+    top: 54px;
+    right: 0;
+    width: 320px;
+    max-height: calc(100vh - 54px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 0;
+    padding: 18px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    display: none;
+    z-index: 998;
+  }
+
+  .cart-panel.open {
+    display: block;
+  }
+
+  .cart-panel h3 {
+    margin: 0 0 12px;
+    font-size: 1.2rem;
+  }
+
+  .cart-panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cart-panel li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cart-panel li:last-child {
+    border-bottom: none;
+  }
+
+  .cart-panel .item-count {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .cart-panel .clear-cart {
+    margin-top: 14px;
+    width: 100%;
+    background: #e76f51;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .cart-panel .checkout-link {
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+    background: #2a9d8f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .cart-panel .checkout-link:hover {
+    background: #21867a;
+  }
+
+  .cart-panel .clear-cart:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  nav {
+    background: #264653;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+  }
+
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 16px 18px;
+    display: inline-block;
+    transition: background 0.2s ease;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    background: #1f3d45;
+  }
+
+  nav a.active {
+    background: #2a9d8f;
+  }
+
+  .nav-links {
+    display: flex;
+    flex: 1;
+  }
+
+  .view-cart-button {
+    background: #264653;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 16px 18px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.2s ease;
+    font-weight: 500;
+    margin: 0;
+    height: auto;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .view-cart-button:hover {
+    background: #1f3d45;
+  }
+
+</style>
+
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-links">
+    <a href="seeds.html" class="nav-link">Seeds</a>
+    <a href="succulents.html" class="nav-link">Succulents</a>
+    <a href="pre_potted_plants.html" class="nav-link">Pre-Potted Plants</a>
+    <a href="soil.html" class="nav-link">Soil</a>
+    <a href="gardening_tools.html" class="nav-link active">Gardening Tools</a>
+    <a href="pots.html" class="nav-link">Pots & Planters</a>
+    <a href="watering_cans.html" class="nav-link">Watering Cans</a>
+    <a href="index.html" class="nav-link">Home</a>
+  </div>
+  <button class="view-cart-button" id="view-cart-button">View Cart (0)</button>
+</nav>
+
+<h1>Gardening Tools Catalog</h1>
+<div class="cart-panel" id="cart-panel" aria-live="polite">
+  <h3>Shopping Cart</h3>
+  <ul id="cart-items"></ul>
+  <button class="clear-cart" id="clear-cart" type="button">Clear Cart</button>
+  <button class="checkout-link" type="button">Checkout</button>
+</div>
+
+<div class="category" id="tools">
+  <h2>Gardening Tools</h2>
+  <div class="catalog">
+    <div class="item"><img src="images_tools/cultivators.jpg" alt="Cultivator"><h3>Cultivator (hand or long-handle)</h3><p>Tines for loosening soil and aerating garden beds.</p></div>
+    <div class="item"><img src="images_tools/garden fork.jpg" alt="Garden Fork"><h3>Garden Fork</h3><p>Strong fork for turning soil, aerating, and breaking up clumps.</p></div>
+    <div class="item"><img src="images_tools/gloves.jpg" alt="Garden Gloves"><h3>Garden Gloves</h3><p>Protective gloves to keep hands safe while working in the dirt.</p></div>
+    <div class="item"><img src="images_tools/garden hoe.jpg" alt="Garden Hoe"><h3>Garden Hoe</h3><p>Tool for weeding, cultivating, and creating furrows.</p></div>
+    <div class="item"><img src="images_tools/garden kneeler.png" alt="Garden Kneeler"><h3>Garden Kneeler</h3><p>Cushioned support for comfortable kneeling during planting and weeding.</p></div>
+    <div class="item"><img src="images_tools/hand rake.jpg" alt="Hand Rake"><h3>Hand Rake</h3><p>Small rake for loosening soil and removing debris in tight spaces.</p></div>
+    <div class="item"><img src="images_tools/hand trowel.jpg" alt="Hand Trowel"><h3>Hand Trowel</h3><p>Compact digging tool for planting and transplanting small plants.</p></div>
+    <div class="item"><img src="images_tools/hose nozzle.jpg" alt="Hose with Nozzle"><h3>Hose with Nozzle</h3><p>Flexible watering hose with adjustable nozzle settings.</p></div>
+    <div class="item"><img src="images_tools/loppers.jpg" alt="Loppers"><h3>Loppers</h3><p>Long-handled cutters designed for thicker branches and hard-to-reach pruning.</p></div>
+    <div class="item"><img src="images_tools/garden tags.png" alt="Plant Labels"><h3>Plant Labels</h3><p>Durable markers for identifying seeds, seedlings, and plant varieties.</p></div>
+    <div class="item"><img src="images_tools/pruning shears.jpg" alt="Pruning Shears"><h3>Pruning Shears</h3><p>Precision clippers for trimming stems and small branches.</p></div>
+    <div class="item"><img src="images_tools/rake (full size).png" alt="Rake (full-size)"><h3>Rake (full-size)</h3><p>Full-size rake for leveling soil and cleaning leaves.</p></div>
+    <div class="item"><img src="images_tools/spade.jpg" alt="Spade"><h3>Spade</h3><p>Flat-bladed shovel for digging, edging, and moving soil.</p></div>
+    <div class="item"><img src="images_tools/soil scoop.jpg" alt="Soil Scoop"><h3>Soil Scoop</h3><p>Small scoop for filling pots and moving potting mix precisely.</p></div>
+    <div class="item"><img src="images_tools/spraybottle.png" alt="Spray Bottle"><h3>Spray Bottle</h3><p>Perfect for misting seedlings and applying foliar sprays.</p></div>
+    <div class="item"><img src="images_tools/weeder tool.png" alt="Weeder Tool"><h3>Weeder Tool</h3><p>Precision weeder for removing roots and unwanted plants.</p></div>
+    <div class="item"><img src="images_tools/wheelbarrow.jpg" alt="Wheelbarrow"><h3>Wheelbarrow</h3><p>Single-wheel cart for carrying soil, plants, and garden supplies.</p></div>
+<script>
+  function getCart() {
+    const stored = localStorage.getItem('garden_cart');
+    return stored ? JSON.parse(stored) : {};
+  }
+
+  function saveCart(cartData) {
+    localStorage.setItem('garden_cart', JSON.stringify(cartData));
+  }
+
+  let cart = getCart();
+  const viewCartButton = document.getElementById('view-cart-button');
+  const cartPanel = document.getElementById('cart-panel');
+  const cartItems = document.getElementById('cart-items');
+  const clearCartButton = document.getElementById('clear-cart');
+
+  function updateCartButton() {
+    const total = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+    viewCartButton.textContent = `View Cart (${total})`;
+  }
+
+  function renderCart() {
+    cartItems.innerHTML = '';
+    const entries = Object.entries(cart);
+
+    if (!entries.length) {
+      const emptyMessage = document.createElement('li');
+      emptyMessage.textContent = 'Your cart is empty.';
+      cartItems.appendChild(emptyMessage);
+      clearCartButton.disabled = true;
+      return;
+    }
+
+    clearCartButton.disabled = false;
+
+    entries.forEach(([name, qty]) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${name}</span><span class="item-count">x${qty}</span>`;
+      cartItems.appendChild(li);
+    });
+  }
+
+  function addToCart(name) {
+    cart[name] = (cart[name] || 0) + 1;
+    saveCart(cart);
+    updateCartButton();
+    renderCart();
+  }
+
+  document.querySelectorAll('.item').forEach((item) => {
+    const title = item.querySelector('h3')?.textContent?.trim() || 'Tool Item';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'add-to-cart';
+    button.textContent = 'Add to cart';
+
+    button.addEventListener('click', () => {
+      addToCart(title);
+      button.textContent = 'Added';
+      setTimeout(() => {
+        button.textContent = 'Add to cart';
+      }, 900);
+    });
+
+    item.appendChild(button);
+  });
+
+  viewCartButton.addEventListener('click', () => {
+    cartPanel.classList.toggle('open');
+  });
+
+  clearCartButton.addEventListener('click', () => {
+    cart = {};
+    saveCart(cart);
+    updateCartButton();
+    renderCart();
+  });
+
+  function setActiveNav() {
+    const currentPage = window.location.pathname.split('/').pop() || 'gardening_tools.html';
+    document.querySelectorAll('.nav-link').forEach(link => {
+      if (link.getAttribute('href') === currentPage) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  updateCartButton();
+  renderCart();
+  setActiveNav();
+</script>
+</body>
+</html>
