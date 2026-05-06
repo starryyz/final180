@@ -22,6 +22,9 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
+@app.route("/")
+def home():
+    return redirect(url_for("login"))
 def get_db_cursor(dictionary=False):
     conn = get_db_connection()
 
@@ -51,13 +54,16 @@ def is_admin():
     user = current_user()
     return user and user["is_admin"] == 1
 
+@app.route("/vendor_dashboard")
+def vendor_dashboard():
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+    if session.get("role") != "vendor":
+        return redirect(url_for("dashboard"))
+    return render_template("vendor_dashboard.html", user=user)
 
-# login/sign up routes
-
-@app.route("/")
-def home():
-    return redirect(url_for("login"))
-
+# login
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -65,19 +71,26 @@ def login():
         password = request.form["password"]
 
         cur = get_db_cursor()
-        cur.execute("SELECT id, first_name, password_hash, is_admin FROM users WHERE email = %s", (email,))
+        cur.execute("""
+            SELECT id, first_name, password_hash, is_admin, role 
+            FROM users 
+            WHERE email = %s
+        """, (email,))
         user = cur.fetchone()
         cur.close()
 
         if user and check_password_hash(user["password_hash"], password):
-            session["user_id"] = user["id"]  # revised
-            session["user_name"] = user["first_name"]  # revised
-            session["is_admin"] = user["is_admin"]  # revised
-
-            if user["is_admin"] == 1:  # revised
+            session["user_id"] = user["id"]  
+            session["user_name"] = user["first_name"] 
+            session["is_admin"] = user["is_admin"]  
+            session["role"] = user["role"]
+            if user["is_admin"] == 1:  
                 return redirect(url_for("admin_dashboard"))
 
+            if user["role"] == "vendor":
+                return redirect(url_for("vendor_dashboard"))
             return redirect(url_for("dashboard"))
+
         else:
             flash("Invalid credentials", "danger")
 
@@ -87,25 +100,24 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        username = request.form["username"]          # NEW
+        username = request.form["username"]          
         first_name = request.form["first_name"]
         last_name = request.form["last_name"]
         email = request.form["email"]
         phone = request.form["phone"]
         address = request.form["address"]
         password = request.form["password"]
-
+        role = request.form["role"]
         password_hash = generate_password_hash(password)
-
         conn = get_db_connection()
         cur = conn.cursor()
         try:
             cur.execute("""
-                INSERT INTO users (username, first_name, last_name, email, phone, address, password_hash)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (username, first_name, last_name, email, phone, address, password_hash))  # UPDATED
+                INSERT INTO users (username, first_name, last_name, email, phone, address, password_hash, role)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (username, first_name, last_name, email, phone, address, password_hash, role))
             conn.commit()
-            flash("Account created! Please log in.", "success")
+            flash("Account created!", "success")
             return redirect(url_for("login"))
         except Exception as e:
             conn.rollback()
@@ -202,11 +214,11 @@ def cart():
             cur.execute("SELECT id, name, price FROM products WHERE id = %s", (pid,))
             product = cur.fetchone()
             if product:
-                subtotal = product["price"] * qty  # revised
+                subtotal = product["price"] * qty
                 items.append({
-                    "id": product["id"],  # revised
-                    "name": product["name"],  # revised
-                    "price": product["price"],  # revised
+                    "id": product["id"],  
+                    "name": product["name"],  
+                    "price": product["price"],  
                     "quantity": qty,
                     "subtotal": subtotal
                 })
@@ -328,7 +340,6 @@ def update_order_status():
     return redirect(url_for("admin_orders"))
 
 # admin routes
-
 @app.route("/admin")
 def admin_dashboard():
     if not is_admin():
@@ -339,11 +350,9 @@ def admin_dashboard():
     # Fetch users
     cur.execute("SELECT id, first_name, last_name, email FROM users")
     users = cur.fetchall()
-
     # Fetch products
     cur.execute("SELECT id, name, category, price, stock FROM products")
     products = cur.fetchall()
-
     cur.close()
     return render_template("admin_dashboard.html", users=users, products=products)
 
@@ -371,7 +380,6 @@ def admin_orders():
         ORDER BY o.created_at DESC
     """)
     orders = cur.fetchall()
-
     cur.close()
     return render_template("admin_orders.html", orders=orders)
 
@@ -380,35 +388,27 @@ def admin_orders():
 def admin_update_order_status(order_id):
     if not is_admin():
         return redirect(url_for("login"))
-
     new_status = request.form["status"]
-
     conn = get_db_connection()
     cur = conn.cursor()
-
     try:
         cur.execute("""
             UPDATE orders
             SET status = %s
             WHERE id = %s
         """, (new_status, order_id))
-
         conn.commit()
         flash(f"Order {order_id} updated to {new_status}.", "success")
-
     except Exception as e:
         conn.rollback()
         flash("Error updating order.", "danger")
-
     finally:
         cur.close()
         conn.close()
-
     return redirect(url_for("admin_orders"))
 
 
 # bloomy bot
-
 @app.route("/bloomybot")
 def bloomybot():
     user = current_user()
@@ -421,8 +421,6 @@ def chatbot_api():
 
     if not user_message:
         return jsonify({"response": "I didn’t catch that. Could you repeat it?"})
-
-    # 🌱 Simple placeholder logic (we will upgrade this)
     if "refund" in user_message.lower():
         bot_reply = "I can help with refunds! Please provide your order number."
     else:
@@ -431,7 +429,7 @@ def chatbot_api():
     return jsonify({"response": bot_reply})
 
 
-# ⭐⭐⭐ CUSTOMER SERVICE PAGE ⭐⭐⭐
+# customer service
 @app.route("/customer_service")
 def customer_service():
     user = current_user()
@@ -439,7 +437,6 @@ def customer_service():
 
 
 # user profile
-
 import os
 from werkzeug.utils import secure_filename
 
@@ -465,7 +462,7 @@ def profile():
             UPDATE users
             SET first_name=%s, last_name=%s, phone=%s, address=%s
             WHERE id=%s
-        """, (first_name, last_name, phone, address, user["id"]))  # revised
+        """, (first_name, last_name, phone, address, user["id"])) 
         conn.commit()
         cur.close()
         conn.close()

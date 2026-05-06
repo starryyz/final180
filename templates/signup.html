@@ -10,43 +10,48 @@
         <h2 class="auth-title">Become a Seedling !</h2>
 
         <form method="POST" action="{{ url_for('signup') }}">
-
-            <!-- NEW FIELD REQUIRED BY BACKEND -->
             <div class="input-group">
                 <label>Username</label>
                 <input type="text" name="username" required>
             </div>
-
             <div class="input-group">
                 <label>First Name</label>
                 <input type="text" name="first_name" required>
             </div>
-
             <div class="input-group">
                 <label>Last Name</label>
                 <input type="text" name="last_name" required>
             </div>
-
             <div class="input-group">
                 <label>Email</label>
                 <input type="email" name="email" required>
             </div>
-
             <div class="input-group">
                 <label>Phone</label>
-                <input type="text" name="phone" required>
+                <input type="text" name="phone" pattern="\d{3}-\d{3}-\d{4}" maxlength="10" oninput="this.value = this.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');">
             </div>
-
             <div class="input-group">
                 <label>Address</label>
                 <input type="text" name="address" required>
             </div>
-
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" name="password" required>
             </div>
-
+            <div class="input-group">
+                <div class="role-selection">
+            <label class="flower-radio">
+            <input type="radio" name="role" value="vendor">
+            <span class="flower-icon">✿</span>
+            <span class="label-text">Vendor</span>
+            </label>
+            <label class="flower-radio">
+            <input type="radio" name="role" value="customer" checked>
+            <span class="flower-icon">✿</span>
+            <span class="label-text">Customer</span>
+            </label>
+            </div>
+            </div>
             <button type="submit" class="auth-btn">Sign Up</button>
         </form>
 
@@ -57,8 +62,5 @@
     </div>
 </div>
 <div>
-    <footer class="footer-signup">
-        <p>&copy; 2026 Blooming Seeds Properties, Inc. All rights reserved.</p>
-</div>
-
+</body>
 {% endblock %}
