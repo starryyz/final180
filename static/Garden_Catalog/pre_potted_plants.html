@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pre-Potted Plants</title>
+
+<style>
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 30px 0 10px;
+    margin: 0;
+    font-size: 2.4rem;
+    letter-spacing: 1px;
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.8rem;
+    color: #2a2a2a;
+  }
+
+  .category {
+    width: 90%;
+    max-width: 1300px;
+    margin: 0 auto 60px;
+  }
+
+  .catalog {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(260px, 1fr));
+    gap: 25px;
+    margin-top: 25px;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  }
+
+  .item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #ddd;
+    margin-bottom: 14px;
+  }
+
+  .item h3 {
+    margin: 12px 0 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .item p {
+    flex: 1;
+    margin: 0 0 14px;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.3rem;
+  }
+
+  .add-to-cart {
+    margin-top: auto;
+    width: 100%;
+    background: #2a9d8f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s ease;
+  }
+
+  .add-to-cart:hover {
+    background: #21867a;
+  }
+
+  .view-cart-button {
+    background: #264653;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 16px 18px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.2s ease;
+    font-weight: 500;
+    margin: 0;
+    height: auto;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .view-cart-button:hover {
+    background: #1f3d45;
+  }
+
+  .cart-panel {
+    position: fixed;
+    top: 54px;
+    right: 0;
+    width: 320px;
+    max-height: calc(100vh - 54px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 0;
+    padding: 18px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    display: none;
+    z-index: 998;
+  }
+
+  .cart-panel.open {
+    display: block;
+  }
+
+  .cart-panel h3 {
+    margin: 0 0 12px;
+    font-size: 1.2rem;
+  }
+
+  .cart-panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cart-panel li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cart-panel li:last-child {
+    border-bottom: none;
+  }
+
+  .cart-panel .item-count {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .cart-panel .clear-cart {
+    margin-top: 14px;
+    width: 100%;
+    background: #e76f51;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .cart-panel .checkout-link {
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+    background: #2a9d8f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .cart-panel .checkout-link:hover {
+    background: #21867a;
+  }
+
+  .cart-panel .clear-cart:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  nav {
+    background: #264653;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+  }
+
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 16px 18px;
+    display: inline-block;
+    transition: background 0.2s ease;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    background: #1f3d45;
+  }
+
+  nav a.active {
+    background: #2a9d8f;
+  }
+
+  .nav-links {
+    display: flex;
+    flex: 1;
+  }
+
+  .view-cart-button {
+    background: #264653;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    padding: 16px 18px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.2s ease;
+    font-weight: 500;
+    margin: 0;
+    height: auto;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .view-cart-button:hover {
+    background: #1f3d45;
+  }
+
+</style>
+
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-links">
+    <a href="seeds.html" class="nav-link">Seeds</a>
+    <a href="succulents.html" class="nav-link">Succulents</a>
+    <a href="pre_potted_plants.html" class="nav-link active">Pre-Potted Plants</a>
+    <a href="soil.html" class="nav-link">Soil</a>
+    <a href="gardening_tools.html" class="nav-link">Gardening Tools</a>
+    <a href="pots.html" class="nav-link">Pots & Planters</a>
+    <a href="watering_cans.html" class="nav-link">Watering Cans</a>
+  </div>
+  <button class="view-cart-button" id="view-cart-button">View Cart (0)</button>
+</nav>
+
+<h1>Pre-Potted Plants</h1>
+<div class="cart-panel" id="cart-panel" aria-live="polite">
+  <h3>Shopping Cart</h3>
+  <ul id="cart-items"></ul>
+  <button class="clear-cart" id="clear-cart" type="button">Clear Cart</button>
+  <button class="checkout-link" type="button">Checkout</button>
+</div>
+<div class="category" id="houseplants">
+  <h2>Houseplants</h2>
+  <div class="catalog">
+
+    <div class="item"><img src="images_pre_potted_plants/birds nest fern.jpg"><h3>Bird’s Nest Fern</h3><p>A tropical fern with shiny, wavy leaves that form a nest-like rosette.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/boston fern.jpg"><h3>Boston Fern</h3><p>A lush fern with arching fronds that thrives in bright, indirect light.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/boxwood.jpg"><h3>Boxwood</h3><p>A compact patio shrub with glossy green leaves and a formal look.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/dwarf alberta spruce.jpg"><h3>Dwarf Alberta Spruce</h3><p>A small, columnar evergreen perfect for patios and compact landscapes.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/euphorbia trigona (african milk tree).jpg"><h3>Euphorbia trigona (African Milk Tree)</h3><p>An architectural succulent with upright stems and bright green foliage.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/kalanchoe tomentosa.jpg"><h3>Kalanchoe tomentosa (Panda Plant)</h3><p>A fuzzy succulent with silvery leaves edged in brown spots.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/lithops (living stones).jpg"><h3>Lithops (Living Stones)</h3><p>A unique pair of stone-like leaves that resemble small rocks.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/pothos.jpg"><h3>Pothos</h3><p>An easy trailing plant with glossy heart-shaped leaves that climbs or cascades.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/rubber plant.jpg"><h3>Rubber Plant (Ficus elastica)</h3><p>A bold indoor tree with shiny, deep green leaves and strong structure.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/snake plant.jpg"><h3>Snake Plant (Sansevieria)</h3><p>A hardy, upright plant with striped sword leaves that tolerates low light.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/spider plant.jpg"><h3>Spider Plant</h3><p>A popular hanging plant with arching foliage and small plantlets.</p></div>
+    <div class="item"><img src="images_pre_potted_plants/zz plant.jpg"><h3>ZZ Plant</h3><p>A tough indoor plant with glossy, dark green leaves and drought tolerance.</p></div>
+
+  </div>
+</div>
+
+<script>
+  function getCart() {
+    const stored = localStorage.getItem('garden_cart');
+    return stored ? JSON.parse(stored) : {};
+  }
+
+  function saveCart(cartData) {
+    localStorage.setItem('garden_cart', JSON.stringify(cartData));
+  }
+
+  let cart = getCart();
+  const viewCartButton = document.getElementById('view-cart-button');
+  const cartPanel = document.getElementById('cart-panel');
+  const cartItems = document.getElementById('cart-items');
+  const clearCartButton = document.getElementById('clear-cart');
+
+  function updateCartButton() {
+    const total = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+    viewCartButton.textContent = `View Cart (${total})`;
+  }
+
+  function renderCart() {
+    cartItems.innerHTML = '';
+    const entries = Object.entries(cart);
+
+    if (!entries.length) {
+      const emptyMessage = document.createElement('li');
+      emptyMessage.textContent = 'Your cart is empty.';
+      cartItems.appendChild(emptyMessage);
+      clearCartButton.disabled = true;
+      return;
+    }
+
+    clearCartButton.disabled = false;
+
+    entries.forEach(([name, qty]) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${name}</span><span class="item-count">x${qty}</span>`;
+      cartItems.appendChild(li);
+    });
+  }
+
+  function addToCart(name) {
+    cart[name] = (cart[name] || 0) + 1;
+    saveCart(cart);
+    updateCartButton();
+    renderCart();
+  }
+
+  document.querySelectorAll('.item').forEach((item) => {
+    const title = item.querySelector('h3')?.textContent?.trim() || 'Houseplant Item';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'add-to-cart';
+    button.textContent = 'Add to cart';
+
+    button.addEventListener('click', () => {
+      addToCart(title);
+      button.textContent = 'Added';
+      setTimeout(() => {
+        button.textContent = 'Add to cart';
+      }, 900);
+    });
+
+    item.appendChild(button);
+  });
+
+  viewCartButton.addEventListener('click', () => {
+    cartPanel.classList.toggle('open');
+  });
+
+  clearCartButton.addEventListener('click', () => {
+    cart = {};
+    saveCart(cart);
+    updateCartButton();
+    renderCart();
+  });
+
+  function setActiveNav() {
+    const currentPage = window.location.pathname.split('/').pop() || 'pre_potted_plants.html';
+    document.querySelectorAll('.nav-link').forEach(link => {
+      if (link.getAttribute('href') === currentPage) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  updateCartButton();
+  renderCart();
+  setActiveNav();
+</script>
+</body>
+</html>
