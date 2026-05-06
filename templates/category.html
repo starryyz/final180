@@ -16,10 +16,11 @@
     {% if products %}
         {% for item in products %}
         <div class="item-card">
-            <img src="{{ item.image_url }}" alt="{{ item.name }}">
+            <img src="{{ url_for('static', filename='Garden_Catalog/' ~ category_name.replace(' ', '_') ~ '/' ~ item.image_url) }}" alt="{{ item.name }}">
             <h3>{{ item.name }}</h3>
             <p>${{ item.price }}</p>
             <p>{{ item.description }}</p>
+            
 
             <form action="{{ url_for('add_to_cart', product_id=item.id) }}" method="POST">
                 <input type="number" name="quantity" value="1" min="1" max="{{ item.stock }}">
