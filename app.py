@@ -30,6 +30,25 @@ def get_db_cursor(dictionary=False):
         return conn.cursor(pymysql.cursors.DictCursor)
     return conn.cursor()
 
+def get_db_connection_for_commit():
+    return get_db_connection()
+
+# def get_db_connection():
+#     return pymysql.connect(
+#         host=Config.MYSQL_HOST,
+#         user=Config.MYSQL_USER,
+#         password=Config.MYSQL_PASSWORD,
+#         database=Config.MYSQL_DB,
+#         port=Config.MYSQL_PORT,
+#         cursorclass=pymysql.cursors.DictCursor
+#     )
+
+# def get_db_cursor(dictionary=False):
+#     conn = get_db_connection()
+#     if dictionary:
+#         return conn.cursor(pymysql.cursors.DictCursor)
+#     return conn.cursor()
+
 @app.route("/")
 def home():
     if "user_id" not in session:
