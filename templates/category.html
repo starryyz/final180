@@ -1,31 +1,130 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- CATEGORY MENU -->
-<div class="top-menu">
-    {% for category in categories %}
-        <a href="{{ url_for('category_page', category_name=category) }}" class="menu-link">
+<div class="top-part">
+    <div class="top-content">
+        {% for category in categories %}
+        <a href="{{ url_for('category_page', category_name=category) }}"
+           class="menu-link hover-btn">
             {{ category.title() }}
         </a>
-    {% endfor %}
+        {% endfor %}
+    </div>
 </div>
+
+{% if session.get('is_admin') == 1 or session.get('role') == 'vendor' %}
+<button class="add" onclick="openModal()">+</button>
+{% endif %}
 
 <h2 class="category-title">{{ category_name.title() }}</h2>
 
+<!-- CREATE MODAL -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <h2 class="head1">Create New Product</h2>
+
+        <input type="text" id="productName" placeholder="Product Title" class="modal-input">
+        <input type="text" id="productDesc" placeholder="Description" class="modal-input">
+        <input type="number" id="productPrice" step="0.01" placeholder="0.00" class="modal-input">
+
+        <div class="question-row">
+            <span class="qnum">Stock:</span>
+           <input type="number" id="productStock" class="qinput" placeholder="Inventory">
+        </div>
+
+        <div class="question-row">
+            <span class="qnum">Warranty:</span>
+            <input type="text" id="productWarranty" placeholder="e.g. 1 Year" class="qinput">
+        </div>
+
+        <div class="question-row">
+            <span class="qnum">Colors:</span>
+            <input type="text" id="productColors" placeholder="Red, Blue, Black" class="qinput">
+        </div>
+
+        <div class="question-row">
+            <span class="qnum">Sizes:</span>
+            <input type="text" id="productSizes" placeholder="S, M, L, XL" class="qinput">
+        </div>
+
+        <div class="question-row">
+            <span class="qnum">Images:</span>
+            <div id="drop-area" class="qinput">
+                <p>Drag images here or click to upload</p>
+                <input type="file" id="fileElem" multiple accept="image/*" style="display:none">
+                <div id="gallery"></div>
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button class="done-btn" onclick="submitProduct()">Create Product</button>
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h2 class="head1">Edit Product</h2>
+
+        <input type="text" id="editName" class="modal-input" placeholder="Product Title">
+        <input type="text" id="editDesc" class="modal-input" placeholder="Description">
+        <input type="number" id="editPrice" step="0.01" class="modal-input">
+
+        <div class="question-row">
+            <span class="qnum">Stock:</span>
+            <input type="number" id="editStock" class="qinput">
+        </div>
+
+        <div class="question-row">
+            <span class="qnum">Warranty:</span>
+            <input type="text" id="editWarranty" class="qinput">
+        </div>
+
+        <div class="question-row">
+            <span class="qnum">Colors:</span>
+            <input type="text" id="editColors" class="qinput">
+        </div>
+
+        <div class="question-row">
+            <span class="qnum">Sizes:</span>
+            <input type="text" id="editSizes" class="qinput">
+        </div>
+
+        <div class="modal-buttons">
+            <button class="done-btn" onclick="updateProduct()">Save Changes</button>
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- PRODUCTS -->
 <div class="card-grid">
     {% if products %}
         {% for item in products %}
         <div class="item-card">
-            <img src="{{ url_for('static', filename='Garden_Catalog/' ~ category_name.replace(' ', '_') ~ '/' ~ item.image_url) }}" alt="{{ item.name }}">
+            <img src="{{ url_for('static', filename='Garden_Catalog/' ~ category_name.replace(' ', '_') ~ '/' ~ item.image_url) }}">
+            
             <h3>{{ item.name }}</h3>
             <p>${{ item.price }}</p>
             <p>{{ item.description }}</p>
-            
 
             <form action="{{ url_for('add_to_cart', product_id=item.id) }}" method="POST">
                 <input type="number" name="quantity" value="1" min="1" max="{{ item.stock }}">
                 <button type="submit" class="add-btn">Add to Cart</button>
             </form>
+
+            {% if session.get('is_admin') == 1 or (session.get('role') == 'vendor' and session.get('user_id') == item.vendor_id) %}
+            <div class="product-admin-controls">
+                <a href="javascript:void(0)"
+                   class="edit-product-btn"
+                   onclick="openEditModal({{ item.id }})">Edit</a>
+
+                <form action="{{ url_for('delete_product', product_id=item.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?');">
+        <button type="submit" class="delete-product-btn">Delete</button>
+            </form>
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
     {% else %}
@@ -33,4 +132,417 @@
     {% endif %}
 </div>
 
+<script>
+let editMode = false;
+let editingProductId = null;
+
+function openModal() {
+    document.getElementById('productModal').style.display = 'block';
+}
+
+async function submitProduct() {
+    const formData = new FormData();
+
+    if (editMode) {
+        // UPDATE MODE
+        formData.append("id", editingProductId);
+        formData.append("name", document.getElementById("editName").value);
+        formData.append("description", document.getElementById("editDesc").value);
+        formData.append("price", document.getElementById("editPrice").value);
+        formData.append("stock", document.getElementById("editStock").value);
+        formData.append("warranty", document.getElementById("editWarranty").value);
+        formData.append("colors", document.getElementById("editColors").value);
+        formData.append("sizes", document.getElementById("editSizes").value);
+
+        const res = await fetch("/edit_product", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+
+    } else {
+        // CREATE MODE
+        formData.append("name", document.getElementById("productName").value);
+        formData.append("description", document.getElementById("productDesc").value);
+        formData.append("price", document.getElementById("productPrice").value);
+        formData.append("stock", document.getElementById("productStock").value);
+        formData.append("warranty", document.getElementById("productWarranty").value);
+        formData.append("colors", document.getElementById("productColors").value);
+        formData.append("sizes", document.getElementById("productSizes").value);
+        formData.append("category", "{{ category_name }}");
+
+        const fileInput = document.getElementById("fileElem");
+        if (fileInput.files.length > 0) {
+            formData.append("image", fileInput.files[0]);
+        }
+
+        const res = await fetch("/create_product", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    }
+}
+
+function closeModal() {
+    document.getElementById('productModal').style.display = 'none';
+    document.getElementById('editModal').style.display = 'none';
+    editMode = false;
+    editingProductId = null;
+}
+
+async function updateProduct() {
+    const formData = new FormData();
+    formData.append("id", editingProductId);
+    formData.append("name", document.getElementById("editName").value);
+    formData.append("description", document.getElementById("editDesc").value);
+    formData.append("price", document.getElementById("editPrice").value);
+    formData.append("stock", document.getElementById("editStock").value);
+    formData.append("warranty", document.getElementById("editWarranty").value);
+    formData.append("colors", document.getElementById("editColors").value);
+    formData.append("sizes", document.getElementById("editSizes").value);
+    const res = await fetch("/edit_product", {
+        method: "POST",
+        body: formData
+    });
+    const data = await res.json();
+
+    if (data.success) {
+        location.reload(); 
+    } else {
+        alert(data.message);
+    }
+}
+async function openEditModal(productId) {
+    editMode = true;
+    editingProductId = productId;
+
+    document.getElementById("editModal").style.display = "block";
+
+    const res = await fetch(`/get_product/${productId}`);
+    const data = await res.json();
+
+    document.getElementById("editName").value = data.name || "";
+    document.getElementById("editDesc").value = data.description || "";
+    document.getElementById("editPrice").value = data.price || "";
+    document.getElementById("editStock").value = data.stock || "";
+    document.getElementById("editWarranty").value = data.warranty || "";
+    document.getElementById("editColors").value = data.colors || "";
+    document.getElementById("editSizes").value = data.sizes || "";
+}
+</script>
+<style>
+    .top-part {
+  width: 100%; 
+  height: 100%;
+  padding-top:10px;
+  background-color:#A3D194;
+  letter-spacing: 1px;
+  display: flex;
+  text-align:center;
+  align-items: center;
+  justify-content: center; 
+}
+
+.menu-link {
+    color: white;
+    font-weight: 400;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.2s ease;
+}
+
+.top-content {
+  display: flex;
+  gap: 3rem;
+  margin:10px;
+  white-space: nowrap; 
+  flex-wrap: nowrap;  
+  width: max-content;
+  text-align:center;
+font-family:"Autour One", system-ui;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(74, 63, 53, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.25s ease;
+}
+
+.modal-content {
+    position: relative;
+    width: 500px;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    margin: 30px auto;
+    padding: 32px;
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(254,249,245,0.92));
+    border: 1px solid rgba(255,255,255,0.45);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12), inset 0 0 25px rgba(255,255,255,0.35);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+
+    animation: modalPop 0.35s ease;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.25);
+    border-radius: 20px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #c7d8b5;
+    border-radius: 20px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #9db88d;
+}
+
+.modal-input,
+.qinput {
+    flex: 1;
+    max-width: 300px;
+    padding: 12px 14px;
+    margin: 8px 0;
+    border-radius: 12px;
+    border: 1px solid rgba(111, 175, 115, 0.22);
+    background: rgba(255,255,255,0.72);
+    font-family: "Autour One", system-ui;
+    font-size: 14px;
+    color: #4A3F35;
+    transition: 0.25s ease;
+    box-shadow:
+        inset 0 0 10px rgba(255,255,255,0.4);
+}
+
+.modal-input:focus, .qinput:focus,
+input[type=text]:focus {
+    outline: none !important;
+    border-color: #a3d194;
+    background: white;
+    box-shadow:
+        0 0 0 4px rgba(163, 209, 148, 0.2);
+}
+
+.question-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.qnum {
+    width: 90px;
+    color: #688888;
+    font-family: "Autour One", system-ui;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.modal-buttons {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+
+.addbtn, .done-btn, .cancel-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-family: "Autour One", system-ui;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.addbtn {
+    background: #dfeee3;
+    color: #4A3F35;
+}
+
+.addbtn:hover {
+    background: #cfe6d3;
+    transform: translateY(-2px) scale(1.03);
+}
+
+.add {
+    background-color: #3A5A40;
+    color: white;
+    border: 2px #3A5A40;
+    margin:30px;
+    width: 30px;
+    border-radius:5px;
+    height: 30px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.add:hover {
+    transform: scale(1.1);
+}
+.done-btn {
+    background: #6FAF73;
+    color: white;
+}
+
+.done-btn:hover {
+    background: #5d9c61;
+    transform: translateY(-2px) scale(1.03);
+}
+
+.cancel-btn {
+    background: #e8b2b2;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #d69a9a;
+    transform: translateY(-2px) scale(1.03);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.hover-btn {
+    display: inline-block;
+    font-weight: 600;
+    margin-top: auto;
+    position: relative;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    z-index: 1;
+    text-align: center;
+    min-width: 100px;
+}
+
+.hover-btn::after {
+    content: '✿'; 
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%) scale(0) rotate(-45deg);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: inherit; 
+}
+
+.hover-btn:hover {
+    padding-right: 45px;
+    transform: scale(1.05);
+}
+
+.hover-btn:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.2) rotate(0deg);
+}
+
+.hover-btn:hover {
+    transform: scale(1.05);
+}
+
+.product-admin-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    justify-content: center;
+    align-items: center;
+}
+
+.product-admin-controls form {
+    margin: 0;
+}
+
+.edit-product-btn,
+.delete-product-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 12px;
+    font-family: "Autour One", system-ui;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.edit-product-btn {
+    background: linear-gradient(135deg, #cfe6d3, #cfe6d3);
+    color: #3A5A40;
+    border: 2px solid #cfe6d3;
+}
+
+.edit-product-btn:hover {
+    background: linear-gradient(135deg, #b7d8bd, #b7d8bd);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 6px 16px rgba(111, 175, 115, 0.2);
+    border: 2px solid #b7d8bd;
+}
+
+.delete-product-btn {
+    background: linear-gradient(135deg, #efc2c2, #efc2c2);
+    color: white;
+    border: 2px solid #efc2c2;
+}
+
+.delete-product-btn:hover {
+    background: linear-gradient(135deg, #e3a0a0, #e3a0a0);
+    transform: translateY(-2px) scale(1.04);
+    border: 2px solid #e3a0a0;
+    box-shadow: 0 6px 16px rgba(200, 90, 90, 0.2);
+}
+</style>
 {% endblock %}

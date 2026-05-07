@@ -2,6 +2,8 @@
 
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 import pymysql
+from werkzeug.utils import secure_filename
+import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from flask import request, jsonify
@@ -12,7 +14,6 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # db helpers
-
 def get_db_connection():
     return pymysql.connect(
         host=Config.MYSQL_HOST,
@@ -23,11 +24,23 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-@app.route("/")
-def home():
-    return redirect(url_for("login"))
 def get_db_cursor(dictionary=False):
     conn = get_db_connection()
+    if dictionary:
+        return conn.cursor(pymysql.cursors.DictCursor)
+    return conn.cursor()
+
+@app.route("/")
+def home():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("is_admin") == 1:
+        return redirect(url_for("admin_dashboard"))
+    elif session.get("role") == "vendor":
+        return redirect(url_for("dashboard"))
+    else:
+        return redirect(url_for("dashboard"))
 
     if dictionary:
         return conn.cursor(pymysql.cursors.DictCursor)
@@ -80,7 +93,7 @@ def login():
                 return redirect(url_for("admin_dashboard"))
 
             if user["role"] == "vendor":
-                return redirect(url_for("/"))
+                return redirect(url_for("home"))
             return redirect(url_for("dashboard"))
 
         else:
@@ -154,11 +167,8 @@ def category_page(category_name):
         return redirect(url_for("dashboard"))
 
     cur = get_db_cursor()
-    cur.execute("""
-        SELECT id, name, description, price, stock, image_url 
-        FROM products 
-        WHERE category = %s
-    """, (category_name,))
+    cur.execute("""SELECT id, name, description, price, stock, image_url, vendor_id FROM products WHERE category = %s
+""", (category_name,))
     products = cur.fetchall()
     cur.close()
 
@@ -375,6 +385,57 @@ def admin_orders():
     cur.close()
     return render_template("admin_orders.html", orders=orders)
 
+@app.route("/edit_product", methods=["POST"])
+def edit_product():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Not logged in"})
+
+    if session.get("role") not in ["vendor"] and session.get("is_admin") != 1:
+        return jsonify({"success": False, "message": "Unauthorized"})
+
+    try:
+        product_id = request.form.get("id")
+        name = request.form.get("name")
+        description = request.form.get("description")
+        price = request.form.get("price")
+        stock = request.form.get("stock")
+        warranty = request.form.get("warranty")
+        colors = request.form.get("colors")
+        sizes = request.form.get("sizes")
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            UPDATE products
+            SET name=%s,
+                description=%s,
+                price=%s,
+                stock=%s,
+                warranty=%s,
+                colors=%s,
+                sizes=%s
+            WHERE id=%s
+        """, (
+            name,
+            description,
+            price,
+            stock,
+            warranty,
+            colors,
+            sizes,
+            product_id
+        ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
 
 @app.route("/admin/order/<int:order_id>/status", methods=["POST"])
 def admin_update_order_status(order_id):
@@ -532,6 +593,156 @@ def profile():
 #
 #     return "Admin user created. You can now log in."
 
+from werkzeug.utils import secure_filename
+import os
+
+PRODUCT_FOLDER = "static/Garden_Catalog"
+
+@app.route("/create_product", methods=["POST"])
+def create_product():
+
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Not logged in"})
+
+    if session.get("role") not in ["vendor"] and session.get("is_admin") != 1:
+        return jsonify({"success": False, "message": "Unauthorized"})
+
+    try:
+        name = request.form.get("name")
+        description = request.form.get("description")
+        price = request.form.get("price")
+        stock = request.form.get("stock")
+        warranty = request.form.get("warranty")
+        colors = request.form.get("colors")
+        sizes = request.form.get("sizes")
+        category = request.form.get("category")
+
+        image_file = request.files.get("image")
+
+        filename = "default.png"
+
+        if image_file and image_file.filename != "":
+            category_folder = os.path.join(
+                PRODUCT_FOLDER,
+                category.replace(" ", "_")
+            )
+
+            os.makedirs(category_folder, exist_ok=True)
+
+            filename = secure_filename(image_file.filename)
+
+            image_path = os.path.join(category_folder, filename)
+
+            image_file.save(image_path)
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO products
+            (
+                name,
+                description,
+                price,
+                stock,
+                warranty,
+                colors,
+                sizes,
+                category,
+                image_url,
+                vendor_id
+            )
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (
+            name,
+            description,
+            price,
+            stock,
+            warranty,
+            colors,
+            sizes,
+            category,
+            filename,
+            session["user_id"]
+        ))
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+
+@app.route("/get_product/<int:product_id>")
+def get_product(product_id):
+    if "user_id" not in session:
+        return jsonify({"error": "not logged in"}), 403
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT id, name, description, price, stock, warranty, colors, sizes
+        FROM products
+        WHERE id = %s
+    """, (product_id,))
+
+    product = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    if not product:
+        return jsonify({"error": "not found"}), 404
+
+    return jsonify(product)
+
+@app.route("/delete_product/<int:product_id>", methods=["POST"])
+def delete_product(product_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    # only admin or vendor allowed
+    if session.get("is_admin") != 1 and session.get("role") != "vendor":
+        flash("Unauthorized", "danger")
+        return redirect(request.referrer or url_for("dashboard"))
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        # optional safety: ensure vendor can only delete their own product
+        if session.get("role") == "vendor" and session.get("is_admin") != 1:
+            cur.execute("SELECT vendor_id FROM products WHERE id = %s", (product_id,))
+            product = cur.fetchone()
+
+            if not product or product["vendor_id"] != session["user_id"]:
+                flash("You cannot delete this product.", "danger")
+                return redirect(request.referrer or url_for("dashboard"))
+
+        # delete product
+        cur.execute("DELETE FROM products WHERE id = %s", (product_id,))
+        conn.commit()
+
+        flash("Product deleted successfully.", "success")
+
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting product: {str(e)}", "danger")
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect(request.referrer or url_for("dashboard"))
 
 print("Hello World")
 
