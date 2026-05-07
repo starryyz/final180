@@ -585,32 +585,36 @@ def profile():
 
 
 # admin revision-- dont touch
-# @app.route("/create_admin")
-# def create_admin():
-#     from werkzeug.security import generate_password_hash
-#
-#     password_hash = generate_password_hash("admin123")
-#
-#     conn = get_db_connection()
-#     cur = conn.cursor()
-#     cur.execute("""
-#         INSERT INTO users (username, first_name, last_name, email, phone, address, password_hash, is_admin)
-#         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-#     """, (
-#         "admin",
-#         "Admin",
-#         "User",
-#         "admin@example.com",
-#         "000-000-0000",
-#         "123 Admin Street",
-#         password_hash,
-#         True
-#     ))
-#     conn.commit()
-#     cur.close()
-#     conn.close()
-#
-#     return "Admin user created. You can now log in."
+@app.route("/create_admin")
+def create_admin():
+    from werkzeug.security import generate_password_hash
+
+    password_hash = generate_password_hash("admin123")
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+    INSERT INTO users 
+    (username, first_name, last_name, email, phone, address, password_hash, is_admin, role)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+""", (
+    "admin",
+    "Admin",
+    "User",
+    "admin@example.com",
+    "000-000-0000",
+    "123 Admin Street",
+    password_hash,
+    True,
+    "admin"
+))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return "Admin user created. You can now log in."
+
 
 
 print("Hello World")
