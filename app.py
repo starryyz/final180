@@ -4,8 +4,6 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 import pymysql
 from werkzeug.utils import secure_filename
 import os
-from werkzeug.utils import secure_filename
-import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from flask import request, jsonify
