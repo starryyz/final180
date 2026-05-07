@@ -35,7 +35,7 @@
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
-
+        
         {% elif request.endpoint != 'login' %}
             <span class="nav-link">
                 <a href="{{ url_for('dashboard') }}">Home</a>
@@ -45,7 +45,7 @@
                 <a href="{{ url_for('customer_service') }}">Contact Us</a>
             </span>
 
-            <!-- ⭐ ORDER HISTORY LINK (added) ⭐ -->
+            <!-- Order history -->
             <span class="nav-link">
                 {% if session.get("user_id") %}
                     <a href="{{ url_for('my_orders') }}">Order History</a>
@@ -75,8 +75,6 @@
     </div>
 </nav>
 
-
-<!-- ⭐ SLIDE-OUT CART PANEL ⭐ -->
 <div id="cart-panel" class="cart-panel">
     <div class="cart-header">
         <h2>Your Cart</h2>
@@ -102,11 +100,8 @@
     </div>
 </div>
 
-
 {% block content %}{% endblock %}
 
-
-<!-- ⭐ FOOTER ⭐ -->
 <footer class="lux-footer">
     <div class="footer-socials">
 
@@ -126,9 +121,8 @@
 
     <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
 </footer>
+</body>
 
-
-<!-- ⭐ CART TOGGLE SCRIPT ⭐ -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const cartPanel = document.getElementById("cart-panel");
@@ -146,7 +140,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-
-</body>
 </html>
 
