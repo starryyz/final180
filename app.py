@@ -583,6 +583,32 @@ def profile():
 
     return render_template("profile.html", user=user)
 
+@app.route("/delete_product/<int:product_id>", methods=["POST"])
+def delete_product(product_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    if session.get("is_admin") != 1 and session.get("role") != "vendor":
+        flash("Unauthorized", "danger")
+        return redirect(request.referrer or url_for("dashboard"))
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        if session.get("role") == "vendor" and session.get("is_admin") != 1:
+            cur.execute("SELECT vendor_id FROM products WHERE id = %s", (product_id,))
+            product = cur.fetchone()
+            if not product or product["vendor_id"] != session["user_id"]:
+                flash("You cannot delete this product.", "danger")
+                return redirect(request.referrer or url_for("dashboard"))
+        cur.execute("DELETE FROM products WHERE id = %s", (product_id,))
+        conn.commit()
+        flash("Product deleted successfully.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting product: {str(e)}", "danger")
+    finally:
+        cur.close()
+        conn.close()
+    return redirect(request.referrer or url_for("dashboard"))
 
 # admin revision-- dont touch
 @app.route("/create_admin")
