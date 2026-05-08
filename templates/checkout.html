@@ -51,6 +51,13 @@
     border-bottom: 1px solid #eee;
 }
 
+/* ⭐ SCROLLABLE ORDER LIST ⭐ */
+.checkout-page .order-scroll {
+    max-height: 370px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
 .checkout-page .checkout-input,
 .checkout-page .checkout-select {
     width: 100%;
@@ -77,6 +84,23 @@
     background: #6aac64;
 }
 
+/* ⭐ TOTALS SECTION ⭐ */
+.checkout-page .checkout-totals {
+    margin-top: 15px;
+    font-size: 1rem;
+}
+
+.checkout-page .total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.checkout-page .total-bold {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
 </style>
 
 <!-- ⭐ WRAP ALL CHECKOUT HTML IN THE SAME NAMESPACE ⭐ -->
@@ -92,15 +116,41 @@
             <div class="checkout-box">
                 <h3>Your Order</h3>
 
+                {% set total_price = 0 %}
                 {% if session.cart %}
-                    <ul class="order-items">
-                        {% for pid, qty in session.cart.items() %}
-                            <li class="order-item">
-                                <strong>Product #{{ pid }}</strong><br>
-                                <span>Qty: {{ qty }}</span>
-                            </li>
-                        {% endfor %}
-                    </ul>
+
+                    <div class="order-scroll">
+                        <ul class="order-items">
+                            {% for item in session.cart %}
+                                {% set total_price = total_price + (item.price * item.quantity) %}
+                                <li class="order-item">
+                                    <strong>{{ item.name }}</strong><br>
+                                    <span>Qty: {{ item.quantity }}</span><br>
+                                    <span>${{ "%.2f"|format(item.price) }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <hr style="margin: 15px 0;">
+
+                    <div class="checkout-totals">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span>${{ "%.2f"|format(total_price) }}</span>
+                        </div>
+
+                        <div class="total-row">
+                            <span>Tax (6%):</span>
+                            <span>${{ "%.2f"|format(total_price * 0.06) }}</span>
+                        </div>
+
+                        <div class="total-row total-bold">
+                            <span>Total:</span>
+                            <span>${{ "%.2f"|format(total_price * 1.06) }}</span>
+                        </div>
+                    </div>
+
                 {% else %}
                     <p>Your cart is empty.</p>
                 {% endif %}
@@ -116,44 +166,62 @@
                 </select>
 
                 <h3>Payment Details</h3>
-                <input type="text" placeholder="Card Number" class="checkout-input">
-                <input type="text" placeholder="Expiration (MM/YY)" class="checkout-input">
-                <input type="text" placeholder="CVV" class="checkout-input">
+
+                <!-- ⭐ FIXED: Added name + required ⭐ -->
+                <input type="text" 
+                       id="card-number" 
+                       name="card_number"
+                       placeholder="1234-5678-9012-3456" 
+                       class="checkout-input"
+                       required>
+
+                <input type="text" 
+                       id="exp-date" 
+                       name="exp_date"
+                       placeholder="MM/YY" 
+                       class="checkout-input"
+                       required>
+
+                <input type="text" 
+                       id="cvv" 
+                       name="cvv"
+                       placeholder="123" 
+                       class="checkout-input"
+                       required>
 
                 <h3>Or Pay With</h3>
 
-<div style="display:flex; gap:15px; margin-bottom:20px;">
+                <div style="display:flex; gap:15px; margin-bottom:20px;">
 
-    <!-- APPLE PAY -->
-    <button type="button" onclick="window.location.href='{{ url_for('order_confirmation') }}'"
-        style="
-            flex:1;
-            padding:12px;
-            background:#000;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
-        ">
-        <img src="{{ url_for('static', filename='images/applepay.jpg') }}" 
-             alt="Apple Pay" style="width:100%; max-height:40px; object-fit:contain;">
-    </button>
+                    <!-- APPLE PAY -->
+                    <button type="button" onclick="window.location.href='{{ url_for('order_confirmation') }}'"
+                        style="
+                            flex:1;
+                            padding:12px;
+                            background:#000;
+                            border:none;
+                            border-radius:8px;
+                            cursor:pointer;
+                        ">
+                        <img src="{{ url_for('static', filename='images/applepay.jpg') }}" 
+                             alt="Apple Pay" style="width:100%; max-height:40px; object-fit:contain;">
+                    </button>
 
-    <!-- GOOGLE PAY -->
-    <button type="button" onclick="window.location.href='{{ url_for('order_confirmation') }}'"
-        style="
-            flex:1;
-            padding:12px;
-            background:#fff;
-            border:1px solid #ccc;
-            border-radius:8px;
-            cursor:pointer;
-        ">
-        <img src="{{ url_for('static', filename='images/googlepay.webp') }}" 
-             alt="Google Pay" style="width:100%; max-height:40px; object-fit:contain;">
-    </button>
+                    <!-- GOOGLE PAY -->
+                    <button type="button" onclick="window.location.href='{{ url_for('order_confirmation') }}'"
+                        style="
+                            flex:1;
+                            padding:12px;
+                            background:#fff;
+                            border:1px solid #ccc;
+                            border-radius:8px;
+                            cursor:pointer;
+                        ">
+                        <img src="{{ url_for('static', filename='images/googlepay.webp') }}" 
+                             alt="Google Pay" style="width:100%; max-height:40px; object-fit:contain;">
+                    </button>
 
-</div>
-
+                </div>
 
                 <button type="submit" class="checkout-btn">Place Order</button>
             </form>
@@ -163,4 +231,84 @@
 
 </div>
 
+<!-- ⭐ INPUT FORMATTING JS ⭐ -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* ⭐ CARD NUMBER FORMAT (xxxx-xxxx-xxxx-xxxx) ⭐ */
+    const cardInput = document.getElementById("card-number");
+    if (cardInput) {
+        cardInput.addEventListener("input", function () {
+            let value = this.value.replace(/\D/g, "");
+            value = value.substring(0, 16);
+            this.value = value.replace(/(.{4})/g, "$1-").replace(/-$/, "");
+        });
+    }
+
+    /* ⭐ EXPIRATION DATE FORMAT (MM/YY) ⭐ */
+    const expInput = document.getElementById("exp-date");
+    if (expInput) {
+        expInput.addEventListener("input", function () {
+            let value = this.value.replace(/\D/g, "");
+            value = value.substring(0, 4);
+            if (value.length >= 3) {
+                this.value = value.substring(0, 2) + "/" + value.substring(2);
+            } else {
+                this.value = value;
+            }
+        });
+    }
+
+    /* ⭐ CVV — ONLY 3 DIGITS ⭐ */
+    const cvvInput = document.getElementById("cvv");
+    if (cvvInput) {
+        cvvInput.addEventListener("input", function () {
+            this.value = this.value.replace(/\D/g, "").substring(0, 3);
+        });
+    }
+
+});
+</script>
+
+
+<!-- ⭐ INPUT FORMATTING JS ⭐ -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* ⭐ CARD NUMBER FORMAT (xxxx-xxxx-xxxx-xxxx) ⭐ */
+    const cardInput = document.getElementById("card-number");
+    if (cardInput) {
+        cardInput.addEventListener("input", function () {
+            let value = this.value.replace(/\D/g, "");
+            value = value.substring(0, 16);
+            this.value = value.replace(/(.{4})/g, "$1-").replace(/-$/, "");
+        });
+    }
+
+    /* ⭐ EXPIRATION DATE FORMAT (MM/YY) ⭐ */
+    const expInput = document.getElementById("exp-date");
+    if (expInput) {
+        expInput.addEventListener("input", function () {
+            let value = this.value.replace(/\D/g, "");
+            value = value.substring(0, 4);
+            if (value.length >= 3) {
+                this.value = value.substring(0, 2) + "/" + value.substring(2);
+            } else {
+                this.value = value;
+            }
+        });
+    }
+
+    /* ⭐ CVV — ONLY 3 DIGITS ⭐ */
+    const cvvInput = document.getElementById("cvv");
+    if (cvvInput) {
+        cvvInput.addEventListener("input", function () {
+            this.value = this.value.replace(/\D/g, "").substring(0, 3);
+        });
+    }
+
+});
+</script>
+
 {% endblock %}
+
