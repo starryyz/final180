@@ -1,17 +1,21 @@
 # app.py
-
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 import pymysql
+from models import db, Product
 from werkzeug.utils import secure_filename
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from flask import request, jsonify
+
+
 import random
 import datetime
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+db.init_app(app)
 
 # db helpers
 def get_db_connection():
@@ -182,12 +186,17 @@ def category_page(category_name):
     if not user:
         return redirect(url_for("login"))
 
+    category_name = category_name.strip().lower()
+
     if category_name not in CATEGORIES:
         return redirect(url_for("dashboard"))
 
     cur = get_db_cursor()
-    cur.execute("""SELECT id, name, description, price, stock, image_url, vendor_id FROM products WHERE category = %s
-""", (category_name,))
+    cur.execute("""
+        SELECT id, name, description, price, stock, image_url, vendor_id 
+        FROM products 
+        WHERE category = %s
+    """, (category_name,))
     products = cur.fetchall()
     cur.close()
 
@@ -199,6 +208,7 @@ def category_page(category_name):
         products=products
     )
 
+
 # cart and checkout routes
 
 @app.route("/add_to_cart/<int:product_id>", methods=["POST"])
@@ -209,15 +219,31 @@ def add_to_cart(product_id):
 
     quantity = int(request.form.get("quantity", 1))
 
-    if "cart" not in session:
-        session["cart"] = {}
+    product = Product.query.get(product_id)
+    if not product:
+        flash("Product not found.", "danger")
+        return redirect(request.referrer or url_for("dashboard"))
+
+    # Ensure cart is always a list
+    if "cart" not in session or not isinstance(session["cart"], list):
+        session["cart"] = []
 
     cart = session["cart"]
-    cart[str(product_id)] = cart.get(str(product_id), 0) + quantity
+
+    cart.append({
+        "id": product.id,
+        "name": product.name,
+        "price": float(product.price),
+        "image_url": product.image_url,
+        "category": product.category,
+        "quantity": quantity
+    })
+
     session["cart"] = cart
 
     flash("Item added to cart!", "success")
     return redirect(request.referrer or url_for("dashboard"))
+
 
 @app.route("/cart")
 def cart():
@@ -225,27 +251,26 @@ def cart():
     if not user:
         return redirect(url_for("login"))
 
-    cart = session.get("cart", {})
+    cart = session.get("cart", [])
     items = []
     total = 0
 
-    if cart:
-        cur = get_db_cursor()
-        for pid, qty in cart.items():
-            cur.execute("SELECT id, name, price FROM products WHERE id = %s", (pid,))
-            product = cur.fetchone()
-            if product:
-                subtotal = product["price"] * qty
-                items.append({
-                    "id": product["id"],  
-                    "name": product["name"],  
-                    "price": product["price"],  
-                    "quantity": qty,
-                    "subtotal": subtotal
-                })
-        cur.close()
+    for item in cart:
+        subtotal = item["price"] * item["quantity"]
+        total += subtotal
+
+        items.append({
+            "id": item["id"],
+            "name": item["name"],
+            "price": item["price"],
+            "quantity": item["quantity"],
+            "subtotal": subtotal,
+            "image_url": item["image_url"],
+            "category": item["category"]
+        })
 
     return render_template("cart.html", user=user, items=items, total=total)
+
 
 @app.route("/checkout", methods=["GET", "POST"])
 def checkout():
