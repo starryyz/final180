@@ -4,17 +4,41 @@
 <h1>Your Cart</h1>
 
 {% if session.cart and session.cart|length > 0 %}
-    {% for item in session.cart %}
-        <div class="cart-item">
-            <img src="{{ url_for('static', filename='Garden_Catalog/' ~ item.category ~ '/' ~ item.image_url) }}" class="cart-img">
+  {% for item in session['cart'] %}
+    <div class="cart-item" data-product-id="{{ item['id'] }}"
+         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
 
-            <p class="cart-name">{{ item.name }}</p>
-            <p class="cart-price">${{ item.price }}</p>
-            <p class="cart-qty">Qty: {{ item.quantity }}</p>
+        <!-- LEFT SIDE -->
+        <div>
+            <span style="font-weight: 600;">{{ item['name'] }}</span><br>
+            <span style="color: #555;">${{ "%.2f"|format(item['price']) }}</span>
+
+            <!-- ⭐ QUANTITY INPUT ONLY ⭐ -->
+            <div class="qty-wrapper" style="margin-top: 6px; display:flex; gap:6px; align-items:center;">
+                <input type="number"
+                       class="qty-input"
+                       value="{{ item['quantity'] }}"
+                       min="1"
+                       max="10"
+                       data-product-id="{{ item['id'] }}"
+                       style="width:50px; padding:5px; border-radius:8px; border:1px solid #ccc;">
+            </div>
         </div>
-    {% endfor %}
+
+        <!-- REMOVE BUTTON -->
+        <button type="button"
+                class="remove-item-btn"
+                data-product-id="{{ item['id'] }}"
+                style="background: none; border: none; cursor: pointer;">
+            <ion-icon name="trash-outline" style="font-size: 20px; color: #c0392b;"></ion-icon>
+        </button>
+
+    </div>
+{% endfor %}
+
 {% else %}
     <p>Your cart is empty.</p>
 {% endif %}
 
 {% endblock %}
+

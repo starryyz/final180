@@ -8,13 +8,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from flask import request, jsonify
 
-
 import random
 import datetime
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
 db.init_app(app)
 
 # db helpers
@@ -65,10 +63,6 @@ def home():
     else:
         return redirect(url_for("dashboard"))
 
-    if dictionary:
-        return conn.cursor(pymysql.cursors.DictCursor)
-
-    return conn.cursor()
 
 def get_db_connection_for_commit():
     conn = get_db_connection()
@@ -176,8 +170,10 @@ CATEGORIES = [
 def dashboard():
     user = current_user()
     if not user:
+        session.clear()   # <--- FIX
         return redirect(url_for("login"))
     return render_template("dashboard.html", user=user, categories=CATEGORIES)
+
 
 
 @app.route("/category/<category_name>")
@@ -230,12 +226,24 @@ def add_to_cart(product_id):
 
     cart = session["cart"]
 
+    # Normalize category for correct folder path
+    normalized_category = product.category.replace(" ", "_").title()
+
+    # ⭐ MERGE DUPLICATES ⭐
+    for item in cart:
+        if item["id"] == product.id:
+            item["quantity"] += quantity
+            session["cart"] = cart
+            flash("Item quantity updated!", "success")
+            return redirect(request.referrer or url_for("dashboard"))
+
+    # ⭐ OTHERWISE ADD NEW ITEM ⭐
     cart.append({
         "id": product.id,
         "name": product.name,
         "price": float(product.price),
         "image_url": product.image_url,
-        "category": product.category,
+        "category": normalized_category,
         "quantity": quantity
     })
 
@@ -271,6 +279,36 @@ def cart():
 
     return render_template("cart.html", user=user, items=items, total=total)
 
+@app.route("/remove_from_cart/<int:product_id>", methods=["POST"])
+def remove_from_cart(product_id):
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+
+    cart = session.get("cart", [])
+
+    # Remove the ENTIRE item entry
+    updated_cart = [item for item in cart if item["id"] != product_id]
+
+    session["cart"] = updated_cart
+
+    return ("", 204)  # No redirect needed for AJAX
+
+
+@app.route("/update_quantity/<int:product_id>", methods=["POST"])
+def update_quantity(product_id):
+    new_qty = int(request.form.get("quantity", 1))
+
+    cart = session.get("cart", [])
+
+    for item in cart:
+        if item["id"] == product_id:
+            item["quantity"] = new_qty
+
+    session["cart"] = cart
+    return ("", 204)
+
+
 
 @app.route("/checkout", methods=["GET", "POST"])
 def checkout():
@@ -278,63 +316,60 @@ def checkout():
     if not user:
         return redirect(url_for("login"))
 
-    cart = session.get("cart", {})
+    cart = session.get("cart", [])
 
-    # Allow checkout page to load even if cart is empty
+    # GET — show checkout page
     if request.method == "GET":
         if not cart:
             flash("Your cart is empty.", "warning")
         return render_template("checkout.html", user=user)
 
-    # POST — placing the order
+    # POST — place order
     pickup_option = request.form.get("pickup_option", "delivery")
 
+    # ⭐ Generate a unique 5‑digit order number
+    order_number = random.randint(10000, 99999)
+
     conn = get_db_connection()
-    cur = conn.cursor(dictionary=True)
+    cur = conn.cursor()
 
     try:
         # Calculate total price
-        total_price = 0
-        for pid, qty in cart.items():
-            cur.execute("SELECT price FROM products WHERE id = %s", (pid,))
-            product = cur.fetchone()
-            if product:
-                total_price += product["price"] * qty
+        total_price = sum(item["price"] * item["quantity"] for item in cart)
 
-        # Insert order
         cur.execute("""
-            INSERT INTO orders (user_id, status, pickup_option, total)
-            VALUES (%s, 'pending', %s, %s)
-        """, (user["id"], pickup_option, total_price))
-        order_id = cur.lastrowid
+            INSERT INTO orders (user_id, status, pickup_option, total_price, order_number)
+            VALUES (%s, 'pending', %s, %s, %s)
+        """, (user["id"], pickup_option, total_price, order_number))
 
-        # Insert order items
-        for pid, qty in cart.items():
-            cur.execute("SELECT price FROM products WHERE id = %s", (pid,))
-            price = cur.fetchone()["price"]
+        order_id = conn.insert_id()
 
+        # Insert each item
+        for item in cart:
             cur.execute("""
                 INSERT INTO order_items (order_id, product_id, quantity, price_each)
                 VALUES (%s, %s, %s, %s)
-            """, (order_id, pid, qty, price))
+            """, (order_id, item["id"], item["quantity"], item["price"]))
 
             # Reduce stock
             cur.execute("""
                 UPDATE products
                 SET stock = stock - %s
                 WHERE id = %s
-            """, (qty, pid))
+            """, (item["quantity"], item["id"]))
 
         conn.commit()
 
-        # Clear cart
-        session["cart"] = {}
+        session["order_number"] = order_number
 
-        flash("Order placed! You'll be notified when it's approved or shipped.", "success")
-        return redirect(url_for("dashboard"))
+    
+        session["cart"] = []
+
+        return redirect(url_for("order_confirmation"))
 
     except Exception as e:
         conn.rollback()
+        print("Checkout error:", e)
         flash("Error placing order.", "danger")
 
     finally:
@@ -342,6 +377,15 @@ def checkout():
         conn.close()
 
     return render_template("checkout.html", user=user)
+
+
+
+#order confirmation page
+@app.route("/order_confirmation")
+def order_confirmation():
+    order_number = session.get("order_number")
+    return render_template("order_confirmation.html", order_number=order_number)
+
 
 
 # my orders page

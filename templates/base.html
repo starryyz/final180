@@ -45,7 +45,6 @@
                 <a href="{{ url_for('customer_service') }}">Contact Us</a>
             </span>
 
-            <!-- Order history -->
             <span class="nav-link">
                 {% if session.get("user_id") %}
                     <a href="{{ url_for('my_orders') }}">Order History</a>
@@ -56,9 +55,14 @@
                 {% if session.get("user_id") %}
 
                     {% if request.endpoint != 'checkout' %}
-                        <!-- CART ICON (TOGGLE PANEL) -->
-                        <a id="cart-icon" href="javascript:void(0)">
+                        <a id="cart-icon" href="javascript:void(0)" class="cart-icon-wrapper">
                             <ion-icon name="cart-outline"></ion-icon>
+
+                            {# ⭐ FIXED LINE ⭐ #}
+                            {% set count = (session.get('cart') or [])|length %}
+                            {% if count > 0 %}
+                                <span id="cart-count" class="cart-count">{{ count }}</span>
+                            {% endif %}
                         </a>
                     {% endif %}
 
@@ -75,18 +79,41 @@
     </div>
 </nav>
 
+<!-- ⭐ UPDATED CART PANEL — NO DROPDOWN ⭐ -->
 <div id="cart-panel" class="cart-panel">
     <div class="cart-header">
         <h2>Your Cart</h2>
         <button id="close-cart" class="close-btn">&times;</button>
     </div>
 
-    <div class="cart-items">
+    <div class="cart-items" style="max-height: 260px; overflow-y: auto; padding-right: 6px;">
         {% if session.get('cart') %}
             {% for item in session['cart'] %}
-                <div class="cart-item">
-                    <span>{{ item['name'] }}</span>
-                    <span>${{ item['price'] }}</span>
+                <div class="cart-item" data-product-id="{{ item['id'] }}"
+                     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+
+                    <div>
+                        <span style="font-weight: 600;">{{ item['name'] }}</span><br>
+                        <span style="color: #555;">${{ "%.2f"|format(item['price']) }}</span>
+
+                        <div class="qty-wrapper" style="margin-top: 6px; display:flex; gap:6px; align-items:center;">
+                            <input type="number"
+                                   class="qty-input"
+                                   value="{{ item['quantity'] }}"
+                                   min="1"
+                                   max="10"
+                                   data-product-id="{{ item['id'] }}"
+                                   style="width:50px; padding:5px; border-radius:8px; border:1px solid #ccc;">
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="remove-item-btn"
+                            data-product-id="{{ item['id'] }}"
+                            style="background: none; border: none; cursor: pointer;">
+                        <ion-icon name="trash-outline" style="font-size: 20px; color: #c0392b;"></ion-icon>
+                    </button>
+
                 </div>
             {% endfor %}
         {% else %}
@@ -121,10 +148,48 @@
 
     <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
 </footer>
-</body>
-
 
 <script>
+/* ⭐ POP ANIMATION ON PAGE LOAD ⭐ */
+window.addEventListener("load", () => {
+    const count = document.getElementById("cart-count");
+    if (count) {
+        count.classList.add("pop");
+        setTimeout(() => count.classList.remove("pop"), 200);
+    }
+});
+
+/* ⭐ GET TOTAL QUANTITY IN CART ⭐ */
+function getTotalCartQuantity() {
+    let total = 0;
+    document.querySelectorAll(".cart-item").forEach(item => {
+        const qtyInput = item.querySelector(".qty-input");
+        const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+        total += qty;
+    });
+    return total;
+}
+
+/* ⭐ UPDATE CART COUNT BADGE ⭐ */
+function updateCartCount(newCount) {
+    const badge = document.getElementById("cart-count");
+    const icon = document.getElementById("cart-icon");
+
+    if (newCount > 0) {
+        if (!badge) {
+            const span = document.createElement("span");
+            span.id = "cart-count";
+            span.className = "cart-count";
+            span.textContent = newCount;
+            icon.appendChild(span);
+        } else {
+            badge.textContent = newCount;
+        }
+    } else {
+        if (badge) badge.remove();
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const cartPanel = document.getElementById("cart-panel");
     const cartIcon = document.getElementById("cart-icon");
@@ -139,7 +204,58 @@ document.addEventListener("DOMContentLoaded", () => {
     closeCart.addEventListener("click", () => {
         cartPanel.classList.remove("open");
     });
+
+    document.querySelectorAll(".remove-item-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const productId = btn.dataset.productId;
+            const itemRow = btn.closest(".cart-item");
+
+            const qtyInput = itemRow.querySelector(".qty-input");
+            const qty = qtyInput ? parseInt(qtyInput.value) : 1;
+
+            const response = await fetch(`/remove_from_cart/${productId}`, {
+                method: "POST"
+            });
+
+            if (response.ok) {
+                itemRow.style.opacity = "0";
+                setTimeout(() => itemRow.remove(), 200);
+
+                const newTotal = getTotalCartQuantity() - qty;
+                updateCartCount(newTotal);
+            }
+        });
+    });
+
+    document.querySelectorAll(".qty-input").forEach(input => {
+        input.addEventListener("input", async function () {
+            const id = this.dataset.productId;
+
+            if (this.value >= 1 && this.value <= 10) {
+                await fetch(`/update_quantity/${id}`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                    body: `quantity=${this.value}`
+                });
+
+                updateCartCount(getTotalCartQuantity());
+            }
+        });
+    });
+});
+
+document.querySelectorAll(".card-form").forEach(form => {
+    form.addEventListener("submit", () => {
+        const qtyInput = form.querySelector(".qty-input");
+        const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+
+        const currentTotal = getTotalCartQuantity();
+        const newTotal = currentTotal + quantity;
+
+        updateCartCount(newTotal);
+    });
 });
 </script>
-</html>
 
+</body>
+</html>
