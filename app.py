@@ -15,19 +15,6 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 
-# -----------------------------------
-# FIX: ADD THIS BLOCK RIGHT HERE
-# -----------------------------------
-CATEGORIES = [
-    "seeds",
-    "succulents",
-    "pre-potted plants",
-    "soil",
-    "gardening tools",
-    "pots",
-    "watering cans"
-]
-
 # db helpers
 def get_db_connection():
     return pymysql.connect(
@@ -76,10 +63,6 @@ def home():
     else:
         return redirect(url_for("dashboard"))
 
-    if dictionary:
-        return conn.cursor(pymysql.cursors.DictCursor)
-
-    return conn.cursor()
 
 def get_db_connection_for_commit():
     conn = get_db_connection()
@@ -187,8 +170,10 @@ CATEGORIES = [
 def dashboard():
     user = current_user()
     if not user:
+        session.clear()   # <--- FIX
         return redirect(url_for("login"))
     return render_template("dashboard.html", user=user, categories=CATEGORIES)
+
 
 
 @app.route("/category/<category_name>")
@@ -325,7 +310,6 @@ def update_quantity(product_id):
 
 
 
-
 @app.route("/checkout", methods=["GET", "POST"])
 def checkout():
     user = current_user()
@@ -353,9 +337,8 @@ def checkout():
         # Calculate total price
         total_price = sum(item["price"] * item["quantity"] for item in cart)
 
-        # ⭐ Insert order WITH order number
         cur.execute("""
-            INSERT INTO orders (user_id, status, pickup_option, total, order_number)
+            INSERT INTO orders (user_id, status, pickup_option, total_price, order_number)
             VALUES (%s, 'pending', %s, %s, %s)
         """, (user["id"], pickup_option, total_price, order_number))
 
@@ -377,10 +360,9 @@ def checkout():
 
         conn.commit()
 
-        # ⭐ Store order number in session for confirmation page
         session["order_number"] = order_number
 
-        # Clear cart
+    
         session["cart"] = []
 
         return redirect(url_for("order_confirmation"))
@@ -395,6 +377,7 @@ def checkout():
         conn.close()
 
     return render_template("checkout.html", user=user)
+
 
 
 #order confirmation page
