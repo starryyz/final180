@@ -1095,6 +1095,65 @@ input[type="email"] {
     background: #6aac64;
 }
 
+/* BOTTOM REVIEWS */
+.reviews-section {
+    margin-top: 50px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 12px;
+}
+
+.reviews-header h2 {
+    color: #4a6b4f;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.reviews-header p {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.review-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.review-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.review-card .review-stars {
+    color: #ffd700;
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.review-card .review-text {
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.review-card .reviewer-name {
+    font-size: 0.8rem;
+    color: #777;
+    font-style: italic;
+    margin-bottom: 4px;
+}
+
+.review-card .review-product {
+    font-size: 0.75rem;
+    color: #4a6b4f;
+    font-weight: bold;
+}
+
 
 @media (max-width: 900px) {
 

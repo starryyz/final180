@@ -15,6 +15,9 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
 # db helpers
 def get_db_connection():
     return pymysql.connect(
@@ -196,12 +199,61 @@ def category_page(category_name):
     products = cur.fetchall()
     cur.close()
 
+    # Define reviews per category
+    category_reviews = {
+        "seeds": [
+            {'rating': 5, 'comment': "The Tomato Seeds I purchased sprouted quickly and produced amazing fruit. Highly recommend!", 'reviewer': 'Alice G.', 'product': 'Tomato Seeds'},
+            {'rating': 5, 'comment': "Basil Seeds were fresh and easy to grow. My herb garden is thriving!", 'reviewer': 'Bob H.', 'product': 'Basil Seeds'},
+            {'rating': 4, 'comment': "Carrot Seeds took a bit longer but the yield was worth it. Good quality.", 'reviewer': 'Charlie I.', 'product': 'Carrot Seeds'},
+            {'rating': 5, 'comment': "Lettuce Seeds germinated perfectly. Fast shipping and great packaging.", 'reviewer': 'Diana J.', 'product': 'Lettuce Seeds'}
+        ],
+        "succulents": [
+            {'rating': 5, 'comment': "The Jade Succulent I bought is so vibrant and healthy. Love the low maintenance!", 'reviewer': 'Frank L.', 'product': 'Jade Succulent'},
+            {'rating': 5, 'comment': "Aloe Vera Succulent arrived in perfect condition. Great for my windowsill.", 'reviewer': 'Grace M.', 'product': 'Aloe Vera Succulent'},
+            {'rating': 4, 'comment': "Echeveria Succulent has beautiful colors. A bit pricey but worth it.", 'reviewer': 'Henry N.', 'product': 'Echeveria Succulent'},
+            {'rating': 5, 'comment': "Cactus Succulent is thriving in my home. Easy care and stunning.", 'reviewer': 'Ivy O.', 'product': 'Cactus Succulent'}
+        ],
+        "pre-potted plants": [
+            {'rating': 5, 'comment': "The Lavender Pre-Potted Plant smells amazing and is blooming beautifully.", 'reviewer': 'Kate Q.', 'product': 'Lavender Pre-Potted Plant'},
+            {'rating': 5, 'comment': "Rosemary Pre-Potted Plant is perfect for cooking. Healthy and strong.", 'reviewer': 'Liam R.', 'product': 'Rosemary Pre-Potted Plant'},
+            {'rating': 4, 'comment': "Mint Pre-Potted Plant grew quickly. Great addition to my garden.", 'reviewer': 'Mia S.', 'product': 'Mint Pre-Potted Plant'},
+            {'rating': 5, 'comment': "Thyme Pre-Potted Plant is thriving. Excellent quality soil.", 'reviewer': 'Noah T.', 'product': 'Thyme Pre-Potted Plant'}
+        ],
+        "soil": [
+            {'rating': 5, 'comment': "Organic Potting Soil is nutrient-rich. My plants love it!", 'reviewer': 'Paul V.', 'product': 'Organic Potting Soil'},
+            {'rating': 5, 'comment': "Garden Soil Blend improved my vegetable patch immensely.", 'reviewer': 'Quinn W.', 'product': 'Garden Soil Blend'},
+            {'rating': 4, 'comment': "Seed Starting Soil worked wonders for germination.", 'reviewer': 'Riley X.', 'product': 'Seed Starting Soil'},
+            {'rating': 5, 'comment': "Compost-Enriched Soil boosted my plant growth.", 'reviewer': 'Sophia Y.', 'product': 'Compost-Enriched Soil'}
+        ],
+        "gardening tools": [
+            {'rating': 5, 'comment': "The Pruning Shears are sharp and durable. Essential for my garden.", 'reviewer': 'Uma A.', 'product': 'Pruning Shears'},
+            {'rating': 5, 'comment': "Garden Trowel is ergonomic and comfortable to use.", 'reviewer': 'Victor B.', 'product': 'Garden Trowel'},
+            {'rating': 4, 'comment': "Watering Can has a great spout. Easy to control flow.", 'reviewer': 'Wendy C.', 'product': 'Watering Can'},
+            {'rating': 5, 'comment': "Garden Gloves are tough and protect my hands well.", 'reviewer': 'Xander D.', 'product': 'Garden Gloves'}
+        ],
+        "pots": [
+            {'rating': 5, 'comment': "Ceramic Plant Pot is beautiful and sturdy. Perfect for indoors.", 'reviewer': 'Zane F.', 'product': 'Ceramic Plant Pot'},
+            {'rating': 5, 'comment': "Plastic Pot Set is lightweight and affordable.", 'reviewer': 'Anna G.', 'product': 'Plastic Pot Set'},
+            {'rating': 4, 'comment': "Terracotta Pots drain well but need protection in winter.", 'reviewer': 'Ben H.', 'product': 'Terracotta Pots'},
+            {'rating': 5, 'comment': "Hanging Planter Basket adds charm to my porch.", 'reviewer': 'Clara I.', 'product': 'Hanging Planter Basket'}
+        ],
+        "watering cans": [
+            {'rating': 5, 'comment': "Metal Watering Can is stylish and functional. Lasts forever.", 'reviewer': 'Ella K.', 'product': 'Metal Watering Can'},
+            {'rating': 5, 'comment': "Plastic Watering Can is lightweight and easy to carry.", 'reviewer': 'Finn L.', 'product': 'Plastic Watering Can'},
+            {'rating': 4, 'comment': "Long-Spout Watering Can reaches deep into plants.", 'reviewer': 'Gina M.', 'product': 'Long-Spout Watering Can'},
+            {'rating': 5, 'comment': "Small Watering Can is perfect for seedlings.", 'reviewer': 'Hugo N.', 'product': 'Small Watering Can'}
+        ]
+    }
+
+    reviews = category_reviews.get(category_name, [])
+
     return render_template(
         "category.html",
         user=user,
         category_name=category_name,
         categories=CATEGORIES,
-        products=products
+        products=products,
+        reviews=reviews
     )
 
 
