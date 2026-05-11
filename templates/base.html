@@ -16,26 +16,25 @@
 </head>
 
 <body>
-
-<nav class="lux-nav">
-    <div class="nav-left">
+<nav class="lux-nav 
+    {% if request.endpoint in ['admin_dashboard', 'admin_orders'] %}
+        admin-header
+    {% elif request.endpoint in ['checkout', 'cart', 'my_orders'] %}
+        order-header
+    {% endif %}
+">    <div class="nav-left">
         <a href="{{ url_for('dashboard') }}">
             <img src="/static/images/logo.png" class="logo" alt="Logo">
         </a>
     </div>
 
     <div class="nav-right">
-
-        {% if request.endpoint == 'admin' %}
-            <span class="nav-link">
-                <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
-            </span>
-
+        {% if session.get('is_admin') == 1%}
             <a href="{{ url_for('profile') }}" class="profile-btn">
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
-        
+
         {% elif request.endpoint != 'login' %}
             <span class="nav-link">
                 <a href="{{ url_for('dashboard') }}">Home</a>
@@ -58,7 +57,6 @@
                         <a id="cart-icon" href="javascript:void(0)" class="cart-icon-wrapper">
                             <ion-icon name="cart-outline"></ion-icon>
 
-                            {# ⭐ FIXED LINE ⭐ #}
                             {% set count = (session.get('cart') or [])|length %}
                             {% if count > 0 %}
                                 <span id="cart-count" class="cart-count">{{ count }}</span>
@@ -75,11 +73,11 @@
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
+
         {% endif %}
     </div>
 </nav>
 
-<!-- ⭐ UPDATED CART PANEL — NO DROPDOWN ⭐ -->
 <div id="cart-panel" class="cart-panel">
     <div class="cart-header">
         <h2>Your Cart</h2>
@@ -128,10 +126,9 @@
 </div>
 
 {% block content %}{% endblock %}
-
 <footer class="lux-footer">
+        {% if request.endpoint not in ['admin_dashboard', 'admin_orders'] %}
     <div class="footer-socials">
-
         <a href="https://www.instagram.com" target="_blank" class="footer-icon">
             <img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram">
         </a>
@@ -143,14 +140,18 @@
         <a href="https://www.tiktok.com" target="_blank" class="footer-icon">
             <img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="TikTok">
         </a>
-
     </div>
+        {% endif %}
 
+{% if request.endpoint in ['admin_dashboard', 'admin_orders'] %}
     <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
+{% else %}
+    <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
+{% endif %}
 </footer>
 
 <script>
-/* ⭐ POP ANIMATION ON PAGE LOAD ⭐ */
+/* pop animation */
 window.addEventListener("load", () => {
     const count = document.getElementById("cart-count");
     if (count) {
@@ -159,7 +160,7 @@ window.addEventListener("load", () => {
     }
 });
 
-/* ⭐ GET TOTAL QUANTITY IN CART ⭐ */
+/* total quantity in cart */
 function getTotalCartQuantity() {
     let total = 0;
     document.querySelectorAll(".cart-item").forEach(item => {
@@ -170,7 +171,7 @@ function getTotalCartQuantity() {
     return total;
 }
 
-/* ⭐ UPDATE CART COUNT BADGE ⭐ */
+/* cart count badge */
 function updateCartCount(newCount) {
     const badge = document.getElementById("cart-count");
     const icon = document.getElementById("cart-icon");
@@ -258,4 +259,14 @@ document.querySelectorAll(".card-form").forEach(form => {
 </script>
 
 </body>
+<style>
+    .lux-nav.admin-header {
+    background-color: rgb(248, 204, 213);
+}
+
+.lux-nav.order-header {
+    background-color: rgb(248, 204, 213);
+}
+
+</style>
 </html>
