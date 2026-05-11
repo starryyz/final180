@@ -16,7 +16,6 @@
 </head>
 
 <body>
-
 <nav class="lux-nav">
     <div class="nav-left">
         <a href="{{ url_for('dashboard') }}">
@@ -25,17 +24,12 @@
     </div>
 
     <div class="nav-right">
-
-        {% if request.endpoint == 'admin' %}
-            <span class="nav-link">
-                <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
-            </span>
-
+        {% if session.get('is_admin') == 1%}
             <a href="{{ url_for('profile') }}" class="profile-btn">
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
-        
+
         {% elif request.endpoint != 'login' %}
             <span class="nav-link">
                 <a href="{{ url_for('dashboard') }}">Home</a>
@@ -58,7 +52,6 @@
                         <a id="cart-icon" href="javascript:void(0)" class="cart-icon-wrapper">
                             <ion-icon name="cart-outline"></ion-icon>
 
-                            {# ⭐ FIXED LINE ⭐ #}
                             {% set count = (session.get('cart') or [])|length %}
                             {% if count > 0 %}
                                 <span id="cart-count" class="cart-count">{{ count }}</span>
@@ -75,11 +68,11 @@
                 <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
                      class="profile-img">
             </a>
+
         {% endif %}
     </div>
 </nav>
 
-<!-- ⭐ UPDATED CART PANEL — NO DROPDOWN ⭐ -->
 <div id="cart-panel" class="cart-panel">
     <div class="cart-header">
         <h2>Your Cart</h2>
@@ -150,7 +143,7 @@
 </footer>
 
 <script>
-/* ⭐ POP ANIMATION ON PAGE LOAD ⭐ */
+/* pop animation */
 window.addEventListener("load", () => {
     const count = document.getElementById("cart-count");
     if (count) {
@@ -159,7 +152,7 @@ window.addEventListener("load", () => {
     }
 });
 
-/* ⭐ GET TOTAL QUANTITY IN CART ⭐ */
+/* total quantity in cart */
 function getTotalCartQuantity() {
     let total = 0;
     document.querySelectorAll(".cart-item").forEach(item => {
@@ -170,7 +163,7 @@ function getTotalCartQuantity() {
     return total;
 }
 
-/* ⭐ UPDATE CART COUNT BADGE ⭐ */
+/* cart count badge */
 function updateCartCount(newCount) {
     const badge = document.getElementById("cart-count");
     const icon = document.getElementById("cart-icon");
