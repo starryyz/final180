@@ -1,5 +1,135 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+    /* .page-title {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        padding-left: 20px;
+    }
+
+    .orders-container {
+        padding: 20px;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .orders-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    .status-select {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+    }
+
+    .update-btn {
+        background-color: #8bc34a;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+    } */
+     /* Container */
+.orders-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(246, 173, 220, 0.15);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    border: 1px solid rgba(250, 180, 245, 0.3);
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+.orders-table th {
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid rgba(245, 197, 243, 0.8);
+}
+
+.orders-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(245, 197, 243, 0.5);
+}
+
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: white;
+    text-transform: capitalize;
+}
+
+
+.status-badge.pending { background-color: #c79ad1; }
+.status-badge.approved { background-color: #8ccf8c; }
+.status-badge.declined { background-color: #e57373; }
+.status-badge.shipped { background-color: #7bb1e8; }
+.status-badge.ready { background-color: #f0b45b; }
+.status-badge.completed { background-color: #6bcf9b; }
+
+
+.status-select {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+
+.update-btn {
+    background-color: #744c74;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.update-btn:hover {
+    background-color: #e9a6e9;
+}
+
+.orders-table a {
+    color: #744c74;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.orders-table a:hover {
+    color: #e9a6e9;
+}
+
+</style>
 
 <h2 class="page-title">Manage Orders</h2>
 
@@ -13,6 +143,7 @@
                 <th>Pickup</th>
                 <th>Created</th>
                 <th>Actions</th>
+                <th><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></th>
             </tr>
         </thead>
 
@@ -25,7 +156,7 @@
 
                 <td>
                     <span class="status-badge {{ o.status }}">
-                        {{ o.status | capitalize }}
+                        {{ o.status | replace("_", " ") | capitalize }}
                     </span>
                 </td>
 
@@ -42,9 +173,21 @@
                 <td>
                     <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o.id) }}">
                         <select name="status" class="status-select">
+
+                            <!-- Always available -->
                             <option value="approved">Approve</option>
                             <option value="declined">Decline</option>
-                            <option value="shipped">Shipped</option>
+
+                            {% if o.pickup_option == "pickup" %}
+                                <!-- ⭐ PICKUP ORDERS USE READY INSTEAD OF SHIPPED ⭐ -->
+                                <option value="ready">Ready for Pickup</option>
+                            {% else %}
+                                <!-- ⭐ DELIVERY ORDERS USE SHIPPED ⭐ -->
+                                <option value="shipped">Shipped</option>
+                            {% endif %}
+
+                            <option value="completed">Completed</option>
+
                         </select>
 
                         <button type="submit" class="update-btn">Update</button>
@@ -56,84 +199,4 @@
     </table>
 </div>
 
-<style>
-    .page-title {
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .orders-container {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    .orders-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.95rem;
-    }
-
-    .orders-table th {
-        background: #f4f6f9;
-        padding: 12px;
-        text-align: left;
-        font-weight: 600;
-        color: #34495e;
-        border-bottom: 2px solid #e0e0e0;
-    }
-
-    .orders-table td {
-        padding: 12px;
-        border-bottom: 1px solid #eee;
-    }
-
-    .orders-table tr:hover {
-        background: #fafafa;
-    }
-
-    /* Status badges */
-    .status-badge {
-        padding: 6px 10px;
-        border-radius: 6px;
-        color: white;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: capitalize;
-    }
-
-    .status-badge.pending { background: #f0ad4e; }
-    .status-badge.approved { background: #0275d8; }
-    .status-badge.shipped { background: #5bc0de; }
-    .status-badge.ready_for_pickup { background: #5cb85c; }
-    .status-badge.completed { background: #4cae4c; }
-    .status-badge.declined { background: #d9534f; }
-
-    .status-select {
-        padding: 6px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        background: #fff;
-    }
-
-    .update-btn {
-        padding: 6px 12px;
-        margin-left: 6px;
-        background: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.85rem;
-    }
-
-    .update-btn:hover {
-        background: #43a047;
-    }
-</style>
-
 {% endblock %}
-

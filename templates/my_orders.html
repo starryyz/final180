@@ -33,18 +33,29 @@
         <!-- ⭐ TRACK ORDER PROGRESS BAR ⭐ -->
         <div class="progress-container">
 
-            <div class="progress-step {% if o.status in ['pending','approved','shipped','completed','ready_for_pickup'] %}active{% endif %}">
+            <!-- ⭐ STEP 1: Pending -->
+            <div class="progress-step {% if o.status in ['pending','approved','ready','shipped','completed'] %}active{% endif %}">
                 Pending
             </div>
 
-            <div class="progress-step {% if o.status in ['approved','shipped','completed','ready_for_pickup'] %}active{% endif %}">
+            <!-- ⭐ STEP 2: Approved -->
+            <div class="progress-step {% if o.status in ['approved','ready','shipped','completed'] %}active{% endif %}">
                 Approved
             </div>
 
-            <div class="progress-step {% if o.status in ['shipped','completed','ready_for_pickup'] %}active{% endif %}">
-                Shipped
-            </div>
+            {% if o.pickup_option == 'pickup' %}
+                <!-- ⭐ PICKUP FLOW -->
+                <div class="progress-step {% if o.status in ['ready','completed'] %}active{% endif %}">
+                    Ready for Pickup
+                </div>
+            {% else %}
+                <!-- ⭐ DELIVERY FLOW -->
+                <div class="progress-step {% if o.status in ['shipped','completed'] %}active{% endif %}">
+                    Shipped
+                </div>
+            {% endif %}
 
+            <!-- ⭐ FINAL STEP -->
             <div class="progress-step {% if o.status == 'completed' %}active{% endif %}">
                 Completed
             </div>
@@ -67,7 +78,6 @@
     </a>
 </div>
 
-{% endif %}
 
 <style>
     .page-title {

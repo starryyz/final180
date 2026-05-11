@@ -386,13 +386,14 @@ def checkout():
     cur = conn.cursor()
 
     try:
-        # Calculate total price
+        # ⭐ Calculate total based on your table column name "total"
         total_price = sum(item["price"] * item["quantity"] for item in cart)
 
+        # ⭐ FIXED: Insert into correct column name "total"
         cur.execute("""
-            INSERT INTO orders (user_id, status, pickup_option, total_price, order_number)
-            VALUES (%s, 'pending', %s, %s, %s)
-        """, (user["id"], pickup_option, total_price, order_number))
+            INSERT INTO orders (user_id, status, pickup_option, total, order_number)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user["id"], "pending", pickup_option, total_price, order_number))
 
         order_id = conn.insert_id()
 
@@ -412,9 +413,10 @@ def checkout():
 
         conn.commit()
 
+        # Save order number for confirmation page
         session["order_number"] = order_number
 
-    
+        # Clear cart
         session["cart"] = []
 
         return redirect(url_for("order_confirmation"))
@@ -428,7 +430,6 @@ def checkout():
         cur.close()
         conn.close()
 
-    return render_template("checkout.html", user=user)
 
 
 
@@ -524,6 +525,30 @@ def admin_orders():
     orders = cur.fetchall()
     cur.close()
     return render_template("admin_orders.html", orders=orders)
+
+
+# editing products
+@app.route("/edit_product", methods=["GET"])
+def edit_product_page():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("role") not in ["vendor"] and session.get("is_admin") != 1:
+        return "Unauthorized", 403
+
+    conn = get_db_connection()
+    cur = conn.cursor(pymysql.cursors.DictCursor)
+
+    cur.execute("SELECT * FROM products")
+    products = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template("edit_product.html", products=products)
+
+
+
 
 @app.route("/edit_product", methods=["POST"])
 def edit_product():
