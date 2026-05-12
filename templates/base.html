@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="icon" type="image/x-icon" href="static/images/icon.png">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/icon.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Autour+One&family=DynaPuff:wght@400..700&display=swap" rel="stylesheet">
 </head>
 
@@ -39,7 +39,7 @@
 
     <div class="nav-left">
         <a href="{{ url_for('dashboard') }}">
-            <img src="/static/images/logo.png" class="logo" alt="Logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="Logo">
         </a>
     </div>
 
@@ -95,11 +95,14 @@
 
                             <ion-icon name="cart-outline"></ion-icon>
 
-                            {% set count = (session.get('cart') or [])|length %}
+                            {% set count = namespace(value=0) %}
+                            {% for item in session.get('cart') or [] %}
+                                {% set count.value = count.value + item['quantity'] %}
+                            {% endfor %}
 
-                            {% if count > 0 %}
+                            {% if count.value > 0 %}
                                 <span id="cart-count" class="cart-count">
-                                    {{ count }}
+                                    {{ count.value }}
                                 </span>
                             {% endif %}
 
@@ -125,17 +128,13 @@
 
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-
         <div class="flash-wrapper">
-
             {% for category, message in messages %}
                 <div class="flash-message flash-{{ category }}">
                     {{ message }}
                 </div>
             {% endfor %}
-
         </div>
-
     {% endif %}
 {% endwith %}
 
@@ -153,17 +152,8 @@
 
                     <div>
                         <span style="font-weight: 600;">{{ item['name'] }}</span><br>
-                        <span style="color: #555;">${{ "%.2f"|format(item['price']) }}</span>
-
-                        <div class="qty-wrapper" style="margin-top: 6px; display:flex; gap:6px; align-items:center;">
-                            <input type="number"
-                                   class="qty-input"
-                                   value="{{ item['quantity'] }}"
-                                   min="1"
-                                   max="10"
-                                   data-product-id="{{ item['id'] }}"
-                                   style="width:50px; padding:5px; border-radius:8px; border:1px solid #ccc;">
-                        </div>
+                        <span style="color: #555;">${{ "%.2f"|format(item['price']) }}</span><br>
+                        <span style="color: #555;">Qty: {{ item['quantity'] }}</span>
                     </div>
 
                     <button type="button"
@@ -232,27 +222,45 @@
 </footer>
 
 
+
+
 <script>
 window.addEventListener("load", () => {
     const count = document.getElementById("cart-count");
+
     if (count) {
         count.classList.add("pop");
-        setTimeout(() => count.classList.remove("pop"), 200);
+
+        setTimeout(() => {
+            count.classList.remove("pop");
+        }, 200);
     }
 });
+
 function getTotalCartQuantity() {
     let total = 0;
+
     document.querySelectorAll(".cart-item").forEach(item => {
         const qtyInput = item.querySelector(".qty-input");
-        const qty = qtyInput ? parseInt(qtyInput.value) : 1;
-        total += qty;
+        const qtyText = item.querySelector(".cart-item-qty");
+
+        if (qtyInput) {
+            total += parseInt(qtyInput.value) || 1;
+        } else if (qtyText) {
+            total += parseInt(qtyText.dataset.quantity) || 1;
+        } else {
+            total += 1;
+        }
     });
+
     return total;
 }
 
 function updateCartCount(newCount) {
     const badge = document.getElementById("cart-count");
     const icon = document.getElementById("cart-icon");
+
+    if (!icon) return;
 
     if (newCount > 0) {
         if (!badge) {
@@ -265,7 +273,9 @@ function updateCartCount(newCount) {
             badge.textContent = newCount;
         }
     } else {
-        if (badge) badge.remove();
+        if (badge) {
+            badge.remove();
+        }
     }
 }
 
@@ -274,34 +284,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartIcon = document.getElementById("cart-icon");
     const closeCart = document.getElementById("close-cart");
 
-    if (cartIcon) {
+    if (cartIcon && cartPanel) {
         cartIcon.addEventListener("click", () => {
             cartPanel.classList.toggle("open");
         });
     }
 
-    closeCart.addEventListener("click", () => {
-        cartPanel.classList.remove("open");
-    });
+    if (closeCart && cartPanel) {
+        closeCart.addEventListener("click", () => {
+            cartPanel.classList.remove("open");
+        });
+    }
 
     document.querySelectorAll(".remove-item-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
             const productId = btn.dataset.productId;
-            const itemRow = btn.closest(".cart-item");
-
-            const qtyInput = itemRow.querySelector(".qty-input");
-            const qty = qtyInput ? parseInt(qtyInput.value) : 1;
 
             const response = await fetch(`/remove_from_cart/${productId}`, {
                 method: "POST"
             });
 
             if (response.ok) {
-                itemRow.style.opacity = "0";
-                setTimeout(() => itemRow.remove(), 200);
-
-                const newTotal = getTotalCartQuantity() - qty;
-                updateCartCount(newTotal);
+                location.reload();
             }
         });
     });
@@ -313,30 +317,49 @@ document.addEventListener("DOMContentLoaded", () => {
             if (this.value >= 1 && this.value <= 10) {
                 await fetch(`/update_quantity/${id}`, {
                     method: "POST",
-                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
                     body: `quantity=${this.value}`
                 });
 
-                updateCartCount(getTotalCartQuantity());
+                location.reload();
             }
         });
     });
-});
 
-document.querySelectorAll(".card-form").forEach(form => {
-    form.addEventListener("submit", () => {
-        const qtyInput = form.querySelector(".qty-input");
-        const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+    document.querySelectorAll(".ajax-cart-form, .card-form").forEach(form => {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-        const currentTotal = getTotalCartQuantity();
-        const newTotal = currentTotal + quantity;
+            const button = form.querySelector("button");
+            const originalText = button ? button.textContent : "";
 
-        updateCartCount(newTotal);
+            if (button) {
+                button.textContent = "Added!";
+                button.classList.add("added");
+            }
+
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                location.reload();
+            } else {
+                if (button) {
+                    button.textContent = originalText;
+                    button.classList.remove("added");
+                }
+
+                alert(data.message || "Could not add item.");
+            }
+        });
     });
-});
 
-
-document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
         const flashMessages = document.querySelectorAll(".flash-message");
 
@@ -351,7 +374,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }, 3000);
 });
-
 </script>
 
 </body>
@@ -381,6 +403,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 .lux-nav.vendor-header ion-icon {
     color: white;
+}
+.lux-nav.refunds-header {
+    background-color: rgb(248, 204, 213);
 }
 .flash-wrapper{
     position: fixed;

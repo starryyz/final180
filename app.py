@@ -712,55 +712,62 @@ def edit_product_page():
 
 @app.route("/edit_product", methods=["POST"])
 def edit_product():
+
     if "user_id" not in session:
-        return jsonify({"success": False, "message": "Not logged in"})
+        return jsonify({
+            "success": False,
+            "message": "Not logged in"
+        })
 
     if session.get("role") not in ["vendor"] and session.get("is_admin") != 1:
-        return jsonify({"success": False, "message": "Unauthorized"})
+        return jsonify({
+            "success": False,
+            "message": "Unauthorized"
+        })
 
     try:
+
         product_id = request.form.get("id")
+
         name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
         stock = request.form.get("stock")
-        warranty = request.form.get("warranty")
-        colors = request.form.get("colors")
-        sizes = request.form.get("sizes")
 
         conn = get_db_connection()
         cur = conn.cursor()
 
         cur.execute("""
             UPDATE products
-            SET name=%s,
+            SET
+                name=%s,
                 description=%s,
                 price=%s,
-                stock=%s,
-                warranty=%s,
-                colors=%s,
-                sizes=%s
+                stock=%s
             WHERE id=%s
         """, (
             name,
             description,
             price,
             stock,
-            warranty,
-            colors,
-            sizes,
             product_id
         ))
 
         conn.commit()
+
         cur.close()
         conn.close()
 
-        return jsonify({"success": True})
+        return jsonify({
+            "success": True
+        })
 
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)})
 
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
 
 @app.route("/admin/order/<int:order_id>/status", methods=["POST"])
 def admin_update_order_status(order_id):
@@ -1138,6 +1145,8 @@ def submit_review(order_id):
 
     flash("Review submitted successfully!", "success")
 
+    return redirect(url_for("my_orders"))
+
 # vendor authentication page
 @app.route("/admin/vendor-authentication")
 def vendor_authentication():
@@ -1188,6 +1197,101 @@ def approve_vendor(vendor_id):
     flash("Vendor approved successfully.", "success")
 
     return redirect(url_for("vendor_authentication"))
+
+
+
+# create product 
+@app.route("/create_product", methods=["POST"])
+def create_product():
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Not logged in"})
+
+    if session.get("role") != "vendor" and session.get("is_admin") != 1:
+        return jsonify({"success": False, "message": "Unauthorized"})
+
+    try:
+        name = request.form.get("name")
+        description = request.form.get("description")
+        price = request.form.get("price")
+        stock = request.form.get("stock")
+        category = request.form.get("category")
+        image = request.files.get("image")
+
+        if not name or not price or not stock or not category:
+            return jsonify({"success": False, "message": "Missing required fields"})
+
+        image_filename = None
+
+        if image and image.filename:
+            image_filename = secure_filename(image.filename)
+
+            folder_name = category.replace(" ", "_")
+            upload_folder = os.path.join(
+                app.root_path,
+                "static",
+                "Garden_Catalog",
+                folder_name
+            )
+
+            os.makedirs(upload_folder, exist_ok=True)
+
+            image.save(os.path.join(upload_folder, image_filename))
+        else:
+            image_filename = "default.png"
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO products
+            (name, category, description, price, stock, image_url, vendor_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (
+            name,
+            category,
+            description,
+            price,
+            stock,
+            image_filename,
+            session.get("user_id")
+        ))
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
+@app.route("/get_product/<int:product_id>")
+def get_product(product_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Not logged in"}), 401
+
+    if session.get("role") != "vendor" and session.get("is_admin") != 1:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    conn = get_db_connection()
+    cur = conn.cursor(pymysql.cursors.DictCursor)
+
+    cur.execute("""
+        SELECT id, name, description, price, stock
+        FROM products
+        WHERE id = %s
+    """, (product_id,))
+
+    product = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    if not product:
+        return jsonify({"success": False, "message": "Product not found"}), 404
+
+    return jsonify(product)
 
 
 
