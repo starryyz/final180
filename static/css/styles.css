@@ -755,14 +755,14 @@ input[type="email"] {
 .auth-switch a:hover {
     text-decoration: underline;
 }
-/* login footer */
+
 .footer-login {
     margin-top: 30px;
     padding: 20px;
     text-align: center;
     background-color: #f1fef6;
 }
-/* sign up footer */
+
 .footer-signup {
     margin-top: 30px;
     padding: 20px;
@@ -1006,7 +1006,7 @@ input[type="email"] {
     transform: scale(1);
     transition: transform 0.2s ease;
 }
-/* GRID LAYOUT */
+
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1014,7 +1014,6 @@ input[type="email"] {
     margin-top: 25px;
 }
 
-/* CARD BASE */
 .pretty-card {
     background: #ffffff;
     border-radius: 16px;
@@ -1029,7 +1028,6 @@ input[type="email"] {
     box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
-/* IMAGE */
 .card-img-wrapper {
     width: 100%;
     height: 180px;
@@ -1044,7 +1042,7 @@ input[type="email"] {
     object-fit: cover;
 }
 
-/* TEXT */
+
 .card-title {
     font-size: 1.2rem;
     font-weight: 600;
@@ -1065,7 +1063,7 @@ input[type="email"] {
     margin-bottom: 14px;
 }
 
-/* FORM */
+
 .card-form {
     display: flex;
     justify-content: center;
@@ -1080,7 +1078,6 @@ input[type="email"] {
     border: 1px solid #ccc;
 }
 
-/* ADD BUTTON */
 .pretty-add-btn {
     background: #7bbf72;
     color: white;
@@ -1095,7 +1092,6 @@ input[type="email"] {
     background: #6aac64;
 }
 
-/* BOTTOM REVIEWS */
 .reviews-section {
     margin-top: 50px;
     padding: 20px;
@@ -1153,7 +1149,6 @@ input[type="email"] {
     color: #4a6b4f;
     font-weight: bold;
 }
-
 
 @media (max-width: 900px) {
 
@@ -1219,3 +1214,213 @@ input[type="email"] {
     }
 }
 
+.admin-back-wrapper {
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.admin-back-btn {
+    background: #fdfdfd;
+    color: #5a3d5c;
+    padding: 5px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s ease;
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.admin-back-btn:hover {
+    background: hsl(344, 63%, 91%);
+    transform: translateY(-2px);
+}
+
+.admin-orders-container{
+    min-height: calc(100vh - 250px);
+    padding: 40px;
+}
+
+.page-title{
+    font-size: 52px;
+    margin-bottom: 35px;
+    color: #4d4036;
+}
+
+
+.orders-table{
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8f3f3;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.orders-table th{
+    background: #e8c2d1;
+    color: #5b3e4b;
+    padding: 18px;
+    font-size: 22px;
+    text-align: left;
+}
+
+.orders-table td{
+    padding: 18px;
+    border-bottom: 1px solid #eadede;
+    vertical-align: middle;
+    font-size: 20px;
+    color: #4d4036;
+}
+
+.orders-table tr:hover{
+    background: #fff9fb;
+}
+
+.status-badge{
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-badge.pending{
+    background: #f3d9a7;
+    color: #7a5a14;
+}
+
+.status-badge.approved{
+    background: #b8e7bf;
+    color: #256132;
+}
+
+.status-badge.denied{
+    background: #efb0b0;
+    color: #7c2323;
+}
+
+
+.admin-orders-container{
+    min-height: calc(100vh - 240px);
+    padding: 25px 35px 60px;
+}
+
+.page-title{
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #4d4036;
+}
+
+.orders-table{
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8f3f3;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+}
+
+.orders-table th{
+    background: #e8c2d1;
+    color: #5b3e4b;
+    padding: 14px;
+    font-size: 16px;
+    text-align: left;
+}
+
+.orders-table td{
+    padding: 14px;
+    border-bottom: 1px solid #eadede;
+    vertical-align: middle;
+    font-size: 15px;
+    color: #4d4036;
+    line-height: 1.4;
+}
+
+.orders-table tr:hover{
+    background: #fff9fb;
+}
+
+
+.orders-table small{
+    color: #7c7070;
+    font-size: 13px;
+}
+
+
+.status-badge{
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-badge.pending{
+    background: #f3d9a7;
+    color: #7a5a14;
+}
+
+.status-badge.approved{
+    background: #b8e7bf;
+    color: #256132;
+}
+
+.status-badge.denied{
+    background: #efb0b0;
+    color: #7c2323;
+}
+.page-title{
+    margin-left: 20px;
+}
+
+.refund-form{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.refund-select{
+    padding: 7px 10px;
+    border-radius: 10px;
+    border: 1px solid #d9c6cf;
+    background: white;
+    font-size: 13px;
+}
+
+
+.update-refund-btn{
+    background: #8a5d87;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    transition: 0.2s ease;
+}
+
+.update-refund-btn:hover{
+    background: #744d72;
+    transform: translateY(-1px);
+}
+
+
+.no-orders{
+    font-size: 18px;
+    color: #6b5c5c;
+    margin-top: 30px;
+}
+
+
+body{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main{
+    flex: 1;
+}

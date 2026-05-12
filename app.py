@@ -38,21 +38,6 @@ def get_db_cursor(dictionary=False):
 def get_db_connection_for_commit():
     return get_db_connection()
 
-# def get_db_connection():
-#     return pymysql.connect(
-#         host=Config.MYSQL_HOST,
-#         user=Config.MYSQL_USER,
-#         password=Config.MYSQL_PASSWORD,
-#         database=Config.MYSQL_DB,
-#         port=Config.MYSQL_PORT,
-#         cursorclass=pymysql.cursors.DictCursor
-#     )
-
-# def get_db_cursor(dictionary=False):
-#     conn = get_db_connection()
-#     if dictionary:
-#         return conn.cursor(pymysql.cursors.DictCursor)
-#     return conn.cursor()
 
 @app.route("/")
 def home():
@@ -91,32 +76,63 @@ def is_admin():
 # login
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
     if request.method == "POST":
+
         email = request.form["email"]
         password = request.form["password"]
 
         cur = get_db_cursor()
+
         cur.execute("""
-            SELECT id, first_name, password_hash, is_admin, role 
-            FROM users 
+            SELECT 
+                id,
+                first_name,
+                password_hash,
+                is_admin,
+                role,
+                vendor_approved
+            FROM users
             WHERE email = %s
         """, (email,))
+
         user = cur.fetchone()
+
         cur.close()
 
         if user and check_password_hash(user["password_hash"], password):
-            session["user_id"] = user["id"]  
-            session["user_name"] = user["first_name"] 
-            session["is_admin"] = user["is_admin"]  
+
+            # Prevent unapproved vendors from logging in
+            if (
+                user["role"] == "vendor"
+                and user["vendor_approved"] == 0
+            ):
+
+                flash(
+                    "Your vendor account is pending admin approval.",
+                    "warning"
+                )
+
+                return redirect(url_for("login"))
+
+            session["user_id"] = user["id"]
+            session["user_name"] = user["first_name"]
+            session["is_admin"] = user["is_admin"]
             session["role"] = user["role"]
-            if user["is_admin"] == 1:  
+
+            # Admin redirect
+            if user["is_admin"] == 1:
                 return redirect(url_for("admin_dashboard"))
 
+            # Vendor redirect
             if user["role"] == "vendor":
-                return redirect(url_for("home"))
+                return redirect(url_for("dashboard"))
+
+            # Normal customer redirect
             return redirect(url_for("dashboard"))
 
         else:
+
             flash("Invalid credentials", "danger")
 
     return render_template("login.html")
@@ -158,7 +174,6 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# user optionns/categories routes
 CATEGORIES = [
     "seeds",
     "succulents",
@@ -182,6 +197,7 @@ def dashboard():
 @app.route("/category/<category_name>")
 def category_page(category_name):
     user = current_user()
+
     if not user:
         return redirect(url_for("login"))
 
@@ -190,58 +206,208 @@ def category_page(category_name):
     if category_name not in CATEGORIES:
         return redirect(url_for("dashboard"))
 
-    cur = get_db_cursor()
+    # FIXED: dictionary=True so product.id works in HTML
+    cur = get_db_cursor(dictionary=True)
+
     cur.execute("""
         SELECT id, name, description, price, stock, image_url, vendor_id 
         FROM products 
         WHERE category = %s
     """, (category_name,))
+
     products = cur.fetchall()
     cur.close()
 
-    # Define reviews per category
+    admin_mode = is_admin()
+
     category_reviews = {
         "seeds": [
-            {'rating': 5, 'comment': "The Tomato Seeds I purchased sprouted quickly and produced amazing fruit. Highly recommend!", 'reviewer': 'Alice G.', 'product': 'Tomato Seeds'},
-            {'rating': 5, 'comment': "Basil Seeds were fresh and easy to grow. My herb garden is thriving!", 'reviewer': 'Bob H.', 'product': 'Basil Seeds'},
-            {'rating': 4, 'comment': "Carrot Seeds took a bit longer but the yield was worth it. Good quality.", 'reviewer': 'Charlie I.', 'product': 'Carrot Seeds'},
-            {'rating': 5, 'comment': "Lettuce Seeds germinated perfectly. Fast shipping and great packaging.", 'reviewer': 'Diana J.', 'product': 'Lettuce Seeds'}
+            {
+                'rating': 5,
+                'comment': "The Tomato Seeds I purchased sprouted quickly and produced amazing fruit. Highly recommend!",
+                'reviewer': 'Alice G.',
+                'product': 'Tomato Seeds'
+            },
+            {
+                'rating': 5,
+                'comment': "Basil Seeds were fresh and easy to grow. My herb garden is thriving!",
+                'reviewer': 'Bob H.',
+                'product': 'Basil Seeds'
+            },
+            {
+                'rating': 4,
+                'comment': "Carrot Seeds took a bit longer but the yield was worth it. Good quality.",
+                'reviewer': 'Charlie I.',
+                'product': 'Carrot Seeds'
+            },
+            {
+                'rating': 5,
+                'comment': "Lettuce Seeds germinated perfectly. Fast shipping and great packaging.",
+                'reviewer': 'Diana J.',
+                'product': 'Lettuce Seeds'
+            }
         ],
+
         "succulents": [
-            {'rating': 5, 'comment': "The Jade Succulent I bought is so vibrant and healthy. Love the low maintenance!", 'reviewer': 'Frank L.', 'product': 'Jade Succulent'},
-            {'rating': 5, 'comment': "Aloe Vera Succulent arrived in perfect condition. Great for my windowsill.", 'reviewer': 'Grace M.', 'product': 'Aloe Vera Succulent'},
-            {'rating': 4, 'comment': "Echeveria Succulent has beautiful colors. A bit pricey but worth it.", 'reviewer': 'Henry N.', 'product': 'Echeveria Succulent'},
-            {'rating': 5, 'comment': "Cactus Succulent is thriving in my home. Easy care and stunning.", 'reviewer': 'Ivy O.', 'product': 'Cactus Succulent'}
+            {
+                'rating': 5,
+                'comment': "The Jade Succulent I bought is so vibrant and healthy. Love the low maintenance!",
+                'reviewer': 'Frank L.',
+                'product': 'Jade Succulent'
+            },
+            {
+                'rating': 5,
+                'comment': "Aloe Vera Succulent arrived in perfect condition. Great for my windowsill.",
+                'reviewer': 'Grace M.',
+                'product': 'Aloe Vera Succulent'
+            },
+            {
+                'rating': 4,
+                'comment': "Echeveria Succulent has beautiful colors. A bit pricey but worth it.",
+                'reviewer': 'Henry N.',
+                'product': 'Echeveria Succulent'
+            },
+            {
+                'rating': 5,
+                'comment': "Cactus Succulent is thriving in my home. Easy care and stunning.",
+                'reviewer': 'Ivy O.',
+                'product': 'Cactus Succulent'
+            }
         ],
+
         "pre-potted plants": [
-            {'rating': 5, 'comment': "The Lavender Pre-Potted Plant smells amazing and is blooming beautifully.", 'reviewer': 'Kate Q.', 'product': 'Lavender Pre-Potted Plant'},
-            {'rating': 5, 'comment': "Rosemary Pre-Potted Plant is perfect for cooking. Healthy and strong.", 'reviewer': 'Liam R.', 'product': 'Rosemary Pre-Potted Plant'},
-            {'rating': 4, 'comment': "Mint Pre-Potted Plant grew quickly. Great addition to my garden.", 'reviewer': 'Mia S.', 'product': 'Mint Pre-Potted Plant'},
-            {'rating': 5, 'comment': "Thyme Pre-Potted Plant is thriving. Excellent quality soil.", 'reviewer': 'Noah T.', 'product': 'Thyme Pre-Potted Plant'}
+            {
+                'rating': 5,
+                'comment': "The Lavender Pre-Potted Plant smells amazing and is blooming beautifully.",
+                'reviewer': 'Kate Q.',
+                'product': 'Lavender Pre-Potted Plant'
+            },
+            {
+                'rating': 5,
+                'comment': "Rosemary Pre-Potted Plant is perfect for cooking. Healthy and strong.",
+                'reviewer': 'Liam R.',
+                'product': 'Rosemary Pre-Potted Plant'
+            },
+            {
+                'rating': 4,
+                'comment': "Mint Pre-Potted Plant grew quickly. Great addition to my garden.",
+                'reviewer': 'Mia S.',
+                'product': 'Mint Pre-Potted Plant'
+            },
+            {
+                'rating': 5,
+                'comment': "Thyme Pre-Potted Plant is thriving. Excellent quality soil.",
+                'reviewer': 'Noah T.',
+                'product': 'Thyme Pre-Potted Plant'
+            }
         ],
+
         "soil": [
-            {'rating': 5, 'comment': "Organic Potting Soil is nutrient-rich. My plants love it!", 'reviewer': 'Paul V.', 'product': 'Organic Potting Soil'},
-            {'rating': 5, 'comment': "Garden Soil Blend improved my vegetable patch immensely.", 'reviewer': 'Quinn W.', 'product': 'Garden Soil Blend'},
-            {'rating': 4, 'comment': "Seed Starting Soil worked wonders for germination.", 'reviewer': 'Riley X.', 'product': 'Seed Starting Soil'},
-            {'rating': 5, 'comment': "Compost-Enriched Soil boosted my plant growth.", 'reviewer': 'Sophia Y.', 'product': 'Compost-Enriched Soil'}
+            {
+                'rating': 5,
+                'comment': "Organic Potting Soil is nutrient-rich. My plants love it!",
+                'reviewer': 'Paul V.',
+                'product': 'Organic Potting Soil'
+            },
+            {
+                'rating': 5,
+                'comment': "Garden Soil Blend improved my vegetable patch immensely.",
+                'reviewer': 'Quinn W.',
+                'product': 'Garden Soil Blend'
+            },
+            {
+                'rating': 4,
+                'comment': "Seed Starting Soil worked wonders for germination.",
+                'reviewer': 'Riley X.',
+                'product': 'Seed Starting Soil'
+            },
+            {
+                'rating': 5,
+                'comment': "Compost-Enriched Soil boosted my plant growth.",
+                'reviewer': 'Sophia Y.',
+                'product': 'Compost-Enriched Soil'
+            }
         ],
+
         "gardening tools": [
-            {'rating': 5, 'comment': "The Pruning Shears are sharp and durable. Essential for my garden.", 'reviewer': 'Uma A.', 'product': 'Pruning Shears'},
-            {'rating': 5, 'comment': "Garden Trowel is ergonomic and comfortable to use.", 'reviewer': 'Victor B.', 'product': 'Garden Trowel'},
-            {'rating': 4, 'comment': "Watering Can has a great spout. Easy to control flow.", 'reviewer': 'Wendy C.', 'product': 'Watering Can'},
-            {'rating': 5, 'comment': "Garden Gloves are tough and protect my hands well.", 'reviewer': 'Xander D.', 'product': 'Garden Gloves'}
+            {
+                'rating': 5,
+                'comment': "The Pruning Shears are sharp and durable. Essential for my garden.",
+                'reviewer': 'Uma A.',
+                'product': 'Pruning Shears'
+            },
+            {
+                'rating': 5,
+                'comment': "Garden Trowel is ergonomic and comfortable to use.",
+                'reviewer': 'Victor B.',
+                'product': 'Garden Trowel'
+            },
+            {
+                'rating': 4,
+                'comment': "Watering Can has a great spout. Easy to control flow.",
+                'reviewer': 'Wendy C.',
+                'product': 'Watering Can'
+            },
+            {
+                'rating': 5,
+                'comment': "Garden Gloves are tough and protect my hands well.",
+                'reviewer': 'Xander D.',
+                'product': 'Garden Gloves'
+            }
         ],
+
         "pots": [
-            {'rating': 5, 'comment': "Ceramic Plant Pot is beautiful and sturdy. Perfect for indoors.", 'reviewer': 'Zane F.', 'product': 'Ceramic Plant Pot'},
-            {'rating': 5, 'comment': "Plastic Pot Set is lightweight and affordable.", 'reviewer': 'Anna G.', 'product': 'Plastic Pot Set'},
-            {'rating': 4, 'comment': "Terracotta Pots drain well but need protection in winter.", 'reviewer': 'Ben H.', 'product': 'Terracotta Pots'},
-            {'rating': 5, 'comment': "Hanging Planter Basket adds charm to my porch.", 'reviewer': 'Clara I.', 'product': 'Hanging Planter Basket'}
+            {
+                'rating': 5,
+                'comment': "Ceramic Plant Pot is beautiful and sturdy. Perfect for indoors.",
+                'reviewer': 'Zane F.',
+                'product': 'Ceramic Plant Pot'
+            },
+            {
+                'rating': 5,
+                'comment': "Plastic Pot Set is lightweight and affordable.",
+                'reviewer': 'Anna G.',
+                'product': 'Plastic Pot Set'
+            },
+            {
+                'rating': 4,
+                'comment': "Terracotta Pots drain well but need protection in winter.",
+                'reviewer': 'Ben H.',
+                'product': 'Terracotta Pots'
+            },
+            {
+                'rating': 5,
+                'comment': "Hanging Planter Basket adds charm to my porch.",
+                'reviewer': 'Clara I.',
+                'product': 'Hanging Planter Basket'
+            }
         ],
+
         "watering cans": [
-            {'rating': 5, 'comment': "Metal Watering Can is stylish and functional. Lasts forever.", 'reviewer': 'Ella K.', 'product': 'Metal Watering Can'},
-            {'rating': 5, 'comment': "Plastic Watering Can is lightweight and easy to carry.", 'reviewer': 'Finn L.', 'product': 'Plastic Watering Can'},
-            {'rating': 4, 'comment': "Long-Spout Watering Can reaches deep into plants.", 'reviewer': 'Gina M.', 'product': 'Long-Spout Watering Can'},
-            {'rating': 5, 'comment': "Small Watering Can is perfect for seedlings.", 'reviewer': 'Hugo N.', 'product': 'Small Watering Can'}
+            {
+                'rating': 5,
+                'comment': "Metal Watering Can is stylish and functional. Lasts forever.",
+                'reviewer': 'Ella K.',
+                'product': 'Metal Watering Can'
+            },
+            {
+                'rating': 5,
+                'comment': "Plastic Watering Can is lightweight and easy to carry.",
+                'reviewer': 'Finn L.',
+                'product': 'Plastic Watering Can'
+            },
+            {
+                'rating': 4,
+                'comment': "Long-Spout Watering Can reaches deep into plants.",
+                'reviewer': 'Gina M.',
+                'product': 'Long-Spout Watering Can'
+            },
+            {
+                'rating': 5,
+                'comment': "Small Watering Can is perfect for seedlings.",
+                'reviewer': 'Hugo N.',
+                'product': 'Small Watering Can'
+            }
         ]
     }
 
@@ -253,43 +419,42 @@ def category_page(category_name):
         category_name=category_name,
         categories=CATEGORIES,
         products=products,
-        reviews=reviews
+        reviews=reviews,
+        admin_mode=admin_mode
     )
 
 
 # cart and checkout routes
-
 @app.route("/add_to_cart/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
     user = current_user()
     if not user:
-        return redirect(url_for("login"))
+        return jsonify({"success": False, "message": "Please log in."}), 401
 
     quantity = int(request.form.get("quantity", 1))
 
     product = Product.query.get(product_id)
     if not product:
-        flash("Product not found.", "danger")
-        return redirect(request.referrer or url_for("dashboard"))
+        return jsonify({"success": False, "message": "Product not found."}), 404
 
-    # Ensure cart is always a list
     if "cart" not in session or not isinstance(session["cart"], list):
         session["cart"] = []
 
     cart = session["cart"]
-
-    # Normalize category for correct folder path
     normalized_category = product.category.replace(" ", "_").title()
 
-    # ⭐ MERGE DUPLICATES ⭐
     for item in cart:
         if item["id"] == product.id:
             item["quantity"] += quantity
             session["cart"] = cart
-            flash("Item quantity updated!", "success")
-            return redirect(request.referrer or url_for("dashboard"))
+            session.modified = True
 
-    # ⭐ OTHERWISE ADD NEW ITEM ⭐
+            return jsonify({
+                "success": True,
+                "message": "Item quantity updated!",
+                "cart_count": sum(i["quantity"] for i in cart)
+            })
+
     cart.append({
         "id": product.id,
         "name": product.name,
@@ -300,9 +465,13 @@ def add_to_cart(product_id):
     })
 
     session["cart"] = cart
+    session.modified = True
 
-    flash("Item added to cart!", "success")
-    return redirect(request.referrer or url_for("dashboard"))
+    return jsonify({
+        "success": True,
+        "message": "Item added to cart!",
+        "cart_count": sum(i["quantity"] for i in cart)
+    })
 
 
 @app.route("/cart")
@@ -339,12 +508,11 @@ def remove_from_cart(product_id):
 
     cart = session.get("cart", [])
 
-    # Remove the ENTIRE item entry
     updated_cart = [item for item in cart if item["id"] != product_id]
 
     session["cart"] = updated_cart
 
-    return ("", 204)  # No redirect needed for AJAX
+    return ("", 204)  
 
 
 @app.route("/update_quantity/<int:product_id>", methods=["POST"])
@@ -370,26 +538,22 @@ def checkout():
 
     cart = session.get("cart", [])
 
-    # GET — show checkout page
     if request.method == "GET":
         if not cart:
             flash("Your cart is empty.", "warning")
         return render_template("checkout.html", user=user)
 
-    # POST — place order
     pickup_option = request.form.get("pickup_option", "delivery")
 
-    # ⭐ Generate a unique 5‑digit order number
     order_number = random.randint(10000, 99999)
 
     conn = get_db_connection()
     cur = conn.cursor()
 
     try:
-        # ⭐ Calculate total based on your table column name "total"
         total_price = sum(item["price"] * item["quantity"] for item in cart)
 
-        # ⭐ FIXED: Insert into correct column name "total"
+    
         cur.execute("""
             INSERT INTO orders (user_id, status, pickup_option, total, order_number)
             VALUES (%s, %s, %s, %s, %s)
@@ -490,10 +654,8 @@ def admin_dashboard():
 
     cur = get_db_cursor(dictionary=True)
 
-    # Fetch users
     cur.execute("SELECT id, first_name, last_name, email FROM users")
     users = cur.fetchall()
-    # Fetch products
     cur.execute("SELECT id, name, category, price, stock FROM products")
     products = cur.fetchall()
     cur.close()
@@ -507,7 +669,6 @@ def admin_orders():
 
     cur = get_db_cursor(dictionary=True)
 
-    # Fetch orders with user info + item count
     cur.execute("""
         SELECT 
             o.id,
@@ -546,7 +707,6 @@ def edit_product_page():
     conn.close()
 
     return render_template("edit_product.html", products=products)
-
 
 
 
@@ -627,25 +787,166 @@ def admin_update_order_status(order_id):
 
 
 # bloomy bot
-@app.route("/bloomybot")
-def bloomybot():
+@app.route("/request_refund", methods=["POST"])
+def request_refund():
+
     user = current_user()
-    return render_template("bloomybot.html", user=user)
 
-@app.route("/chatbot_api", methods=["POST"])
-def chatbot_api():
+    if not user:
+        return jsonify({
+            "success": False,
+            "message": "Please log in first."
+        })
+
     data = request.get_json()
-    user_message = data.get("message", "").strip()
 
-    if not user_message:
-        return jsonify({"response": "I didn’t catch that. Could you repeat it?"})
-    if "refund" in user_message.lower():
-        bot_reply = "I can help with refunds! Please provide your order number."
-    else:
-        bot_reply = "I'm BloomyBot! I’ll soon be able to process refunds and notify admins."
+    order_number = data.get("order_number")
+    reason = data.get("reason", "Refund requested through BloomyBot.")
 
-    return jsonify({"response": bot_reply})
+    cur = get_db_cursor(dictionary=True)
 
+    cur.execute("""
+        SELECT 
+            refund_requests.id,
+            refund_requests.status,
+            orders.total
+        FROM refund_requests
+        JOIN orders
+            ON refund_requests.order_id = orders.id
+        WHERE orders.order_number = %s
+    """, (order_number,))
+
+    existing_refund = cur.fetchone()
+
+    if existing_refund and existing_refund["status"] == "approved":
+
+        amount = existing_refund["total"]
+
+        cur.close()
+
+        return jsonify({
+            "success": True,
+            "message": f"${amount:.2f} will be credited back to your account shortly."
+        })
+
+    if existing_refund and existing_refund["status"] == "denied":
+
+        cur.close()
+
+        return jsonify({
+            "success": False,
+            "message": "Unfortunately your refund request was denied."
+        })
+
+    if existing_refund and existing_refund["status"] == "pending":
+
+        cur.close()
+
+        return jsonify({
+            "success": True,
+            "message": "Your refund request is still pending admin approval."
+        })
+
+    cur.execute("""
+        SELECT id, user_id, total
+        FROM orders
+        WHERE order_number = %s
+        AND user_id = %s
+    """, (order_number, user["id"]))
+
+    order = cur.fetchone()
+
+    if not order:
+
+        cur.close()
+
+        return jsonify({
+            "success": False,
+            "message": "I could not find that order number under your account."
+        })
+
+    cur.execute("""
+        INSERT INTO refund_requests
+        (order_id, user_id, reason)
+        VALUES (%s, %s, %s)
+    """, (
+        order["id"],
+        user["id"],
+        reason
+    ))
+
+    cur.connection.commit()
+    cur.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Your refund request has been submitted. An admin will review it soon."
+    })
+
+@app.route("/update_refund_status/<int:refund_id>", methods=["POST"])
+def update_refund_status(refund_id):
+
+    if session.get("is_admin") != 1:
+        return redirect(url_for("login"))
+
+    status = request.form.get("status")
+
+    cur = get_db_cursor()
+
+    cur.execute("""
+        UPDATE refund_requests
+        SET status = %s
+        WHERE id = %s
+    """, (status, refund_id))
+
+    cur.connection.commit()
+    cur.close()
+
+    flash("Refund request updated successfully!", "success")
+
+    return redirect(url_for("admin_refunds"))
+    return redirect(url_for("my_orders"))
+
+@app.route("/admin/refunds")
+def admin_refunds():
+
+    if session.get("is_admin") != 1:
+        return redirect(url_for("login"))
+
+    cur = get_db_cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT 
+            refund_requests.id,
+            refund_requests.reason,
+            refund_requests.status,
+            refund_requests.created_at,
+
+            orders.order_number,
+            orders.total,
+
+            users.first_name,
+            users.last_name,
+            users.email
+
+        FROM refund_requests
+
+        JOIN orders 
+            ON refund_requests.order_id = orders.id
+
+        JOIN users 
+            ON refund_requests.user_id = users.id
+
+        ORDER BY refund_requests.created_at DESC
+    """)
+
+    refunds = cur.fetchall()
+    cur.close()
+
+    return render_template(
+        "admin_refunds.html",
+        refunds=refunds
+    )
 
 # customer service
 @app.route("/customer_service")
@@ -729,6 +1030,8 @@ def profile():
 
     return render_template("profile.html", user=user)
 
+
+# delete product
 @app.route("/delete_product/<int:product_id>", methods=["POST"])
 def delete_product(product_id):
     if "user_id" not in session:
@@ -755,6 +1058,8 @@ def delete_product(product_id):
         cur.close()
         conn.close()
     return redirect(request.referrer or url_for("dashboard"))
+
+
 
 # admin revision-- dont touch
 @app.route("/create_admin")
@@ -788,8 +1093,104 @@ def create_admin():
     return "Admin user created. You can now log in."
 
 
+# Admin update products view
+@app.route("/admin/store")
+def admin_store_view():
+    if not is_admin():
+        return redirect(url_for("login"))
 
-print("Hello World")
+    user = current_user()
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        categories=CATEGORIES,
+        admin_mode=True
+    )
+
+
+# review submissions
+@app.route("/submit_review/<int:order_id>", methods=["POST"])
+def submit_review(order_id):
+
+    user = current_user()
+
+    if not user:
+        return redirect(url_for("login"))
+
+    rating = request.form.get("rating")
+    comment = request.form.get("comment")
+
+    cur = get_db_cursor()
+
+    cur.execute("""
+        INSERT INTO reviews (user_id, order_id, rating, comment)
+        VALUES (%s, %s, %s, %s)
+    """, (
+        user["id"],
+        order_id,
+        rating,
+        comment
+    ))
+
+    cur.connection.commit()
+    cur.close()
+
+    flash("Review submitted successfully!", "success")
+
+# vendor authentication page
+@app.route("/admin/vendor-authentication")
+def vendor_authentication():
+
+    if session.get("is_admin") != 1:
+        flash("Admin access only.", "danger")
+        return redirect(url_for("dashboard"))
+
+    cur = get_db_cursor()
+
+    cur.execute("""
+        SELECT *
+        FROM users
+        WHERE role = 'vendor'
+        AND vendor_approved = 0
+    """)
+
+    pending_vendors = cur.fetchall()
+
+    cur.close()
+
+    return render_template(
+        "vendor_authentication.html",
+        pending_vendors=pending_vendors
+    )
+
+@app.route("/approve-vendor/<int:vendor_id>", methods=["POST"])
+def approve_vendor(vendor_id):
+
+    if session.get("is_admin") != 1:
+        flash("Admin access only.", "danger")
+        return redirect(url_for("dashboard"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE users
+        SET vendor_approved = 1
+        WHERE id = %s
+    """, (vendor_id,))
+
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    flash("Vendor approved successfully.", "success")
+
+    return redirect(url_for("vendor_authentication"))
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

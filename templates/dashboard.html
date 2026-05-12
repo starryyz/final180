@@ -1,67 +1,131 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="background2">
-  <div class="marquee">
+
+{% if not admin_mode and session.get('role') != 'vendor' %}
+
+<div class="marquee">
     <div class="marquee-content">
-      <span>Watch your garden bloom with our stupendous seeds!</span>
-      <span>Organic and delivered straight to your doorstep.</span>
-      <span>Freshly harvested seeds, packed with lots of love!</span>
-      <span>Grow your own garden today</span>
+        <span>Watch your garden bloom with our stupendous seeds!</span>
+        <span>Organic and delivered straight to your doorstep.</span>
+        <span>Freshly harvested seeds, packed with lots of love!</span>
+        <span>Grow your own garden today</span>
     </div>
-  </div>
-</div> 
+</div>
+
+{% else %}
+
+<div class="marquee admin-marquee">
+
+    {% if admin_mode %}
+        <a href="{{ url_for('admin_dashboard') }}" class="admin-back-btn">
+            ← Back to Admin Dashboard
+        </a>
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+</div>
+
 <div class="welcome">
-    <h2 class="category-title">Welcome back, {{ session.get('user_name') }}!</h2>
-    <p class ="desc-title">Select a category to continue growing your garden.</p>
+
+    <h2 class="category-title">
+        {% if admin_mode %}
+            Welcome back, Admin!
+        {% elif session.get('role') == 'vendor' %}
+            Welcome back, Vendor!
+        {% else %}
+            Welcome back, {{ session.get('user_name') }}!
+        {% endif %}
+    </h2>
+
+    <p class="desc-title">
+        Select a category to continue growing your garden.
+    </p>
+
 </div>
 
 <div class="category-slider-container">
+
     <button class="slider-arrow left-arrow">&#10094;</button>
 
     <div class="category-slider" id="categorySlider">
+
         {% for category in categories %}
         {% set category_slug = category.lower().replace(' ', '-') %}
+
         <div class="slide slide-{{ category_slug }}">
+
             <div class="slide-image">
-                <img src="{{ url_for('static', filename='images/' + category_slug + '.png') }}" class="slidesimage">
+                <img src="{{ url_for('static', filename='images/' + category_slug + '.png') }}"
+                     class="slidesimage">
             </div>
+
             <div class="slide-info">
                 <h2>{{ category.title() }}</h2>
-                <a href="{{ url_for('category_page', category_name=category) }}" class="browse-btn">Browse</a>
+
+                <a href="{{ url_for('category_page', category_name=category) }}"
+                   class="browse-btn">
+                    Browse
+                </a>
             </div>
+
         </div>
+
         {% endfor %}
+
     </div>
 
     <button class="slider-arrow right-arrow">&#10095;</button>
+
 </div>
 
 <div class="gallery-section">
+
     <h2 class="gallery-title">Share your Growth!</h2>
+
     <h3>#BloomingSeeds</h3>
+
     <div class="gallery-grid">
         <img src="{{ url_for('static', filename='images/people1.jpg') }}">
         <img src="{{ url_for('static', filename='images/people2.webp') }}">
         <img src="{{ url_for('static', filename='images/people3.jpg') }}">
         <img src="{{ url_for('static', filename='images/people4.avif') }}">
     </div>
+
 </div>
 
 <div class="story-section">
+
     <h2 class="story-title">The Mission</h2>
+
     <p class="story-text">
-        "Our mission is to bring high quality seeds right to your doorstep, 
+        "Our mission is to bring high quality seeds right to your doorstep,
         making it more convenient than ever to grow your own plants!"
     </p>
+
 </div>
 
 <div class="map-section">
+
     <h2 class="map-title">Our Location</h2>
-    <div id="map" class="map-container" style="height: 400px; width: 100%;"></div>
+
+    <div id="map"
+         class="map-container"
+         style="height: 400px; width: 100%;">
+    </div>
+
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -117,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", () => goToSlide(index, false));
 
-    // --- 2. MAP RESTORATION ---
     const map = L.map('map').setView([40.0379, -76.3055], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

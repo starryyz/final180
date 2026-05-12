@@ -2,13 +2,9 @@
 {% block content %}
 
 <style>
-
-/* ⭐ WRAP ALL CHECKOUT STYLES IN A NAMESPACE TO PREVENT CART OVERRIDES ⭐ */
 .checkout-page * {
     box-sizing: border-box;
 }
-
-/* ⭐ All checkout styles now apply ONLY inside .checkout-page ⭐ */
 
 .checkout-page .checkout-container {
     max-width: 900px;
@@ -113,8 +109,6 @@
             <!-- LEFT: ORDER SUMMARY -->
             <div class="checkout-box">
                 <h3>Your Order</h3>
-
-                <!-- ⭐ FIXED TOTAL CALCULATION ⭐ -->
                 {% set ns = namespace(total_price=0) %}
 
                 {% if session.cart %}
@@ -161,7 +155,6 @@
                 {% endif %}
             </div>
 
-            <!-- RIGHT: CHECKOUT FORM -->
             <form method="POST" class="checkout-box">
 
                 <h3>Pickup or Delivery</h3>
@@ -195,7 +188,6 @@
 
                 <div style="display:flex; gap:15px; margin-bottom:20px;">
 
-                    <!-- ⭐ APPLE PAY ⭐ -->
                     <button type="submit" 
                             name="pay_method" 
                             value="apple"
@@ -213,8 +205,6 @@
                              style="width:100%; max-height:40px; object-fit:contain;">
 
                     </button>
-
-                    <!-- ⭐ GOOGLE PAY ⭐ -->
                     <button type="submit" 
                             name="pay_method" 
                             value="google"
@@ -234,8 +224,6 @@
                     </button>
 
                 </div>
-
-                <!-- ⭐ NORMAL CHECKOUT ⭐ -->
                 <button type="submit" 
                         name="pay_method" 
                         value="card" 
@@ -251,8 +239,6 @@
     </div>
 
 </div>
-
-<!-- ⭐ INPUT FORMATTING JS ⭐ -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -295,7 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ⭐ CVV — ONLY 3 DIGITS ⭐ */
     const cvvInput = checkoutPage.querySelector("#cvv");
 
     if (cvvInput) {

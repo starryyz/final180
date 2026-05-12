@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Blooming Seeds</title>
 
-    <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
@@ -16,26 +15,62 @@
 </head>
 
 <body>
+
 <nav class="lux-nav 
-    {% if request.endpoint in ['admin_dashboard', 'admin_orders'] %}
+    {% if session.get('role') == 'vendor' %}
+        vendor-header
+
+    {% elif request.endpoint in [
+        'admin_dashboard',
+        'admin_orders',
+        'admin_store_view',
+        'vendor_authentication'
+    ] or (
+        request.endpoint == 'category_page'
+        and session.get('is_admin') == 1
+    ) %}
         admin-header
+
     {% elif request.endpoint in ['checkout', 'cart', 'my_orders'] %}
         order-header
+
     {% endif %}
-">    <div class="nav-left">
+">
+
+    <div class="nav-left">
         <a href="{{ url_for('dashboard') }}">
             <img src="/static/images/logo.png" class="logo" alt="Logo">
         </a>
     </div>
 
     <div class="nav-right">
-        {% if session.get('is_admin') == 1%}
+
+        {% if session.get('is_admin') == 1 %}
+
+            <span class="nav-link">
+                <a href="{{ url_for('vendor_authentication') }}">
+                    Vendor Authentication
+                </a>
+            </span>
+
             <a href="{{ url_for('profile') }}" class="profile-btn">
-                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
+                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}"
+                     class="profile-img">
+            </a>
+
+        {% elif session.get('role') == 'vendor' %}
+
+            <span class="nav-link">
+                <a href="{{ url_for('my_orders') }}">Order History</a>
+            </span>
+
+            <a href="{{ url_for('profile') }}" class="profile-btn">
+                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}"
                      class="profile-img">
             </a>
 
         {% elif request.endpoint != 'login' %}
+
             <span class="nav-link">
                 <a href="{{ url_for('dashboard') }}">Home</a>
             </span>
@@ -54,29 +89,55 @@
                 {% if session.get("user_id") %}
 
                     {% if request.endpoint != 'checkout' %}
-                        <a id="cart-icon" href="javascript:void(0)" class="cart-icon-wrapper">
+                        <a id="cart-icon"
+                           href="javascript:void(0)"
+                           class="cart-icon-wrapper">
+
                             <ion-icon name="cart-outline"></ion-icon>
 
                             {% set count = (session.get('cart') or [])|length %}
+
                             {% if count > 0 %}
-                                <span id="cart-count" class="cart-count">{{ count }}</span>
+                                <span id="cart-count" class="cart-count">
+                                    {{ count }}
+                                </span>
                             {% endif %}
+
                         </a>
                     {% endif %}
 
                 {% else %}
+
                     <a href="{{ url_for('login') }}">Login</a>
+
                 {% endif %}
             </span>
 
             <a href="{{ url_for('profile') }}" class="profile-btn">
-                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}" 
+                <img src="{{ session.get('profile_pic', url_for('static', filename='images/default-profile.png')) }}"
                      class="profile-img">
             </a>
 
         {% endif %}
+
     </div>
 </nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+
+        <div class="flash-wrapper">
+
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+{% endwith %}
 
 <div id="cart-panel" class="cart-panel">
     <div class="cart-header">
@@ -126,32 +187,52 @@
 </div>
 
 {% block content %}{% endblock %}
+
 <footer class="lux-footer">
-        {% if request.endpoint not in ['admin_dashboard', 'admin_orders'] %}
+
+{% if request.endpoint not in [
+    'admin_dashboard',
+    'admin_orders',
+    'admin_store_view',
+    'vendor_authentication'
+] and not (
+    request.endpoint == 'category_page'
+    and session.get('is_admin') == 1
+) %}
+
     <div class="footer-socials">
-        <a href="https://www.instagram.com" target="_blank" class="footer-icon">
-            <img src="{{ url_for('static', filename='images/instagram.png') }}" alt="Instagram">
+
+        <a href="https://www.instagram.com"
+           target="_blank"
+           class="footer-icon">
+            <img src="{{ url_for('static', filename='images/instagram.png') }}"
+                 alt="Instagram">
         </a>
 
-        <a href="https://www.facebook.com" target="_blank" class="footer-icon">
-            <img src="{{ url_for('static', filename='images/facebook.png') }}" alt="Facebook">
+        <a href="https://www.facebook.com"
+           target="_blank"
+           class="footer-icon">
+            <img src="{{ url_for('static', filename='images/facebook.png') }}"
+                 alt="Facebook">
         </a>
 
-        <a href="https://www.tiktok.com" target="_blank" class="footer-icon">
-            <img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="TikTok">
+        <a href="https://www.tiktok.com"
+           target="_blank"
+           class="footer-icon">
+            <img src="{{ url_for('static', filename='images/tiktok.png') }}"
+                 alt="TikTok">
         </a>
+
     </div>
-        {% endif %}
 
-{% if request.endpoint in ['admin_dashboard', 'admin_orders'] %}
-    <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
-{% else %}
-    <p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
 {% endif %}
+
+<p class="footer-copy">© 2026 BSC Properties, Inc. All rights reserved.</p>
+
 </footer>
 
+
 <script>
-/* pop animation */
 window.addEventListener("load", () => {
     const count = document.getElementById("cart-count");
     if (count) {
@@ -159,8 +240,6 @@ window.addEventListener("load", () => {
         setTimeout(() => count.classList.remove("pop"), 200);
     }
 });
-
-/* total quantity in cart */
 function getTotalCartQuantity() {
     let total = 0;
     document.querySelectorAll(".cart-item").forEach(item => {
@@ -171,7 +250,6 @@ function getTotalCartQuantity() {
     return total;
 }
 
-/* cart count badge */
 function updateCartCount(newCount) {
     const badge = document.getElementById("cart-count");
     const icon = document.getElementById("cart-icon");
@@ -256,6 +334,24 @@ document.querySelectorAll(".card-form").forEach(form => {
         updateCartCount(newTotal);
     });
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+        const flashMessages = document.querySelectorAll(".flash-message");
+
+        flashMessages.forEach((msg) => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateX(40px)";
+            msg.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+
+            setTimeout(() => {
+                msg.remove();
+            }, 400);
+        });
+    }, 3000);
+});
+
 </script>
 
 </body>
@@ -263,9 +359,79 @@ document.querySelectorAll(".card-form").forEach(form => {
     .lux-nav.admin-header {
     background-color: rgb(248, 204, 213);
 }
-/* .lux-nav.order-header {
-    background-color: rgb(248, 204, 213);
-} */
 
+.lux-nav.admin-header {
+    background-color: rgb(248, 204, 213);
+}
+.lux-nav.vendor-header {
+    background: linear-gradient(
+        90deg,
+        rgb(151, 101, 73),
+        rgb(181, 126, 92)
+    );
+}
+
+.lux-nav.vendor-header .nav-link a {
+    color: white;
+}
+
+.lux-nav.vendor-header .nav-link a:hover {
+    color: rgb(255, 230, 210);
+}
+
+.lux-nav.vendor-header ion-icon {
+    color: white;
+}
+.flash-wrapper{
+    position: fixed;
+    top: 110px;
+    right: 25px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.flash-message{
+    padding: 16px 22px;
+    border-radius: 16px;
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    animation: slideFade 0.35s ease;
+    min-width: 260px;
+}
+
+.flash-success{
+    background: linear-gradient(135deg, #6fb06f, #4f8f4f);
+}
+
+
+.flash-danger{
+    background: linear-gradient(135deg, #d96c6c, #b84d4d);
+}
+
+
+.flash-warning{
+    background: linear-gradient(135deg, #e6b85c, #cc9836);
+}
+
+
+.flash-info{
+    background: linear-gradient(135deg, #6ca6d9, #4c89bf);
+}
+
+@keyframes slideFade{
+    from{
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to{
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 </style>
 </html>

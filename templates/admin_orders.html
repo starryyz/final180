@@ -1,52 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-    /* .page-title {
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-        font-weight: 600;
-        color: #2c3e50;
-        padding-left: 20px;
-    }
-
-    .orders-container {
-        padding: 20px;
-    }
-
-    .orders-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-
-    .orders-table th,
-    .orders-table td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .orders-table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-    }
-
-    .status-select {
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        background-color: #fff;
-    }
-
-    .update-btn {
-        background-color: #8bc34a;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-    } */
-     /* Container */
 .orders-container {
     margin-top: 20px;
     padding: 20px;
@@ -174,15 +128,12 @@
                     <form method="POST" action="{{ url_for('admin_update_order_status', order_id=o.id) }}">
                         <select name="status" class="status-select">
 
-                            <!-- Always available -->
                             <option value="approved">Approve</option>
                             <option value="declined">Decline</option>
 
                             {% if o.pickup_option == "pickup" %}
-                                <!-- ⭐ PICKUP ORDERS USE READY INSTEAD OF SHIPPED ⭐ -->
                                 <option value="ready">Ready for Pickup</option>
                             {% else %}
-                                <!-- ⭐ DELIVERY ORDERS USE SHIPPED ⭐ -->
                                 <option value="shipped">Shipped</option>
                             {% endif %}
 

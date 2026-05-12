@@ -11,15 +11,22 @@
 
         <div class="order-header">
             <h3>Order #{{ o.id }}</h3>
+
             <span class="status-badge {{ o.status }}">
                 {{ o.status | replace("_", " ") | capitalize }}
             </span>
         </div>
 
         <div class="order-details">
-            <p><strong>Total:</strong> ${{ "%.2f"|format(o.total) }}</p>
 
-            <p><strong>Pickup Option:</strong>
+            <p>
+                <strong>Total:</strong>
+                ${{ "%.2f"|format(o.total) }}
+            </p>
+
+            <p>
+                <strong>Pickup Option:</strong>
+
                 {% if o.pickup_option == "pickup" %}
                     Pickup
                 {% else %}
@@ -27,40 +34,92 @@
                 {% endif %}
             </p>
 
-            <p><strong>Placed On:</strong> {{ o.created_at }}</p>
+            <p>
+                <strong>Placed On:</strong>
+                {{ o.created_at }}
+            </p>
+
         </div>
 
-        <!-- ⭐ TRACK ORDER PROGRESS BAR ⭐ -->
         <div class="progress-container">
 
-            <!-- ⭐ STEP 1: Pending -->
             <div class="progress-step {% if o.status in ['pending','approved','ready','shipped','completed'] %}active{% endif %}">
                 Pending
             </div>
 
-            <!-- ⭐ STEP 2: Approved -->
             <div class="progress-step {% if o.status in ['approved','ready','shipped','completed'] %}active{% endif %}">
                 Approved
             </div>
 
             {% if o.pickup_option == 'pickup' %}
-                <!-- ⭐ PICKUP FLOW -->
+
                 <div class="progress-step {% if o.status in ['ready','completed'] %}active{% endif %}">
                     Ready for Pickup
                 </div>
+
             {% else %}
-                <!-- ⭐ DELIVERY FLOW -->
+
                 <div class="progress-step {% if o.status in ['shipped','completed'] %}active{% endif %}">
                     Shipped
                 </div>
+
             {% endif %}
 
-            <!-- ⭐ FINAL STEP -->
             <div class="progress-step {% if o.status == 'completed' %}active{% endif %}">
                 Completed
             </div>
 
         </div>
+        {% if o.status == 'completed' %}
+
+        <div class="review-order-section">
+
+            <button type="button"
+                    class="review-toggle-btn"
+                    onclick="toggleReviewForm('{{ o.id }}')">
+
+                Review Order
+
+            </button>
+
+            <div id="review-form-{{ o.id }}"
+                 class="review-form-box"
+                 style="display: none;">
+
+                <form action="{{ url_for('submit_review', order_id=o.id) }}"
+                      method="POST">
+
+                    <label>Rating:</label>
+
+                    <select name="rating" required>
+                        <option value="">Choose rating</option>
+                        <option value="5">★★★★★</option>
+                        <option value="4">★★★★</option>
+                        <option value="3">★★★</option>
+                        <option value="2">★★</option>
+                        <option value="1">★</option>
+                    </select>
+
+                    <label>Review:</label>
+
+                    <textarea name="comment"
+                              placeholder="Write your review..."
+                              required></textarea>
+
+                    <button type="submit"
+                            class="submit-review-btn">
+
+                        Submit Review
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        {% endif %}
 
     </div>
     {% endfor %}
@@ -70,13 +129,23 @@
 {% else %}
 
 <div class="empty-state">
-    <div class="empty-icon">🛒</div>
-    <p class="no-orders">You have no orders yet.</p>
 
-    <a href="{{ url_for('dashboard') }}" class="start-shopping-btn">
+    <div class="empty-icon">🛒</div>
+
+    <p class="no-orders">
+        You have no orders yet.
+    </p>
+
+    <a href="{{ url_for('dashboard') }}"
+       class="start-shopping-btn">
+
         Start Shopping
+
     </a>
+
 </div>
+
+{% endif %}
 
 
 <style>
@@ -121,7 +190,6 @@
         color: #555;
     }
 
-    /* ⭐ PROGRESS BAR ⭐ */
     .progress-container {
         display: flex;
         justify-content: space-between;
@@ -149,7 +217,6 @@
         transform: scale(1.05);
     }
 
-    /* ⭐ EMPTY STATE ⭐ */
     .empty-state {
         margin-top: 40px;
         text-align: center;
@@ -184,8 +251,6 @@
         background: #7ab03f;
         transform: translateY(-2px);
     }
-
-    /* Status badges */
     .status-badge {
         padding: 6px 12px;
         border-radius: 6px;
@@ -202,7 +267,6 @@
     .status-badge.completed { background: #4cae4c; }
     .status-badge.declined { background: #d9534f; }
 
-    /* ⭐ Footer stays at bottom ⭐ */
     body {
         display: flex;
         flex-direction: column;
@@ -212,6 +276,121 @@
     .lux-footer {
         margin-top: auto;
     }
-</style>
 
+.review-order-section{
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px dashed #d8d8d8;
+}
+
+
+.review-toggle-btn{
+    background: linear-gradient(135deg, #d98bb0, #c97452);
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    font-family: inherit;
+}
+
+.review-toggle-btn:hover{
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+
+.review-form-box{
+    margin-top: 18px;
+    background: #f9f6f2;
+    padding: 22px;
+    border-radius: 18px;
+    box-shadow: inset 0 0 0 2px #ece2d8;
+    animation: fadeReview 0.25s ease;
+}
+
+
+.review-form-box label{
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 15px;
+    font-weight: 600;
+    color: #4d4038;
+    font-size: 15px;
+}
+
+
+.review-form-box select,
+.review-form-box textarea{
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 2px solid #ddd;
+    background: white;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border 0.2s ease;
+}
+
+
+.review-form-box textarea{
+    min-height: 120px;
+    resize: vertical;
+}
+
+
+.review-form-box select:focus,
+.review-form-box textarea:focus{
+    outline: none;
+    border-color: #d98bb0;
+}
+
+
+.submit-review-btn{
+    margin-top: 18px;
+    background: #6fb06f;
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.submit-review-btn:hover{
+    background: #5a9a5a;
+    transform: translateY(-2px);
+}
+
+/* ⭐ ANIMATION ⭐ */
+@keyframes fadeReview{
+    from{
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+<script>
+function toggleReviewForm(orderId) {
+    const form = document.getElementById(`review-form-${orderId}`);
+
+    if (form.style.display === "none") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
+    }
+}
+</script>
 {% endblock %}

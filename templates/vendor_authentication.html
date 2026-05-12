@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .vendor-wrapper{
+        min-height: 80vh;
+        padding: 40px;
+    }
+
+    .vendor-title{
+        margin-bottom: 30px;
+    }
+
+    .vendor-table{
+        width: 100%;
+        border-collapse: collapse;
+        background: rgba(255,255,255,0.4);
+        border-radius: 20px;
+        overflow: hidden;
+        backdrop-filter: blur(6px);
+    }
+
+    .vendor-table th,
+    .vendor-table td{
+        padding: 18px;
+        text-align: left;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .vendor-table th{
+        background: rgba(246, 173, 220, 0.25);
+    }
+
+    .approve-btn{
+        background: #7dbb74;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 12px;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .approve-btn:hover{
+        background: #63985c;
+    }
+
+    .pending-badge{
+        color: #9a5d00;
+        font-weight: bold;
+    }
+</style>
+
+<div class="vendor-wrapper">
+
+    <h1 class="vendor-title">
+        Vendor Authentication Requests
+    </h1>
+
+    <table class="vendor-table">
+
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+        {% for vendor in pending_vendors %}
+
+        <tr>
+            <td>{{ vendor.id }}</td>
+            <td>{{ vendor.first_name }} {{ vendor.last_name }}</td>
+            <td>{{ vendor.email }}</td>
+
+            <td>
+                <span class="pending-badge">
+                    Pending Approval
+                </span>
+            </td>
+
+            <td>
+
+                <form method="POST"
+                      action="{{ url_for('approve_vendor', vendor_id=vendor.id) }}">
+
+                    <button type="submit" class="approve-btn">
+                        Approve Vendor
+                    </button>
+
+                </form>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+{% endblock %}

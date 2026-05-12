@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="page-title">Refund Requests</h2>
+
+<div class="admin-orders-container">
+
+{% if refunds %}
+
+<table class="orders-table">
+
+    <tr>
+        <th>ID</th>
+        <th>Order</th>
+        <th>Customer</th>
+        <th>Reason</th>
+        <th>Status</th>
+        <th>Amount</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for r in refunds %}
+
+    <tr>
+
+        <td>{{ r.id }}</td>
+
+        <td>#{{ r.order_number }}</td>
+
+        <td>
+            {{ r.first_name }} {{ r.last_name }}
+            <br>
+            <small>{{ r.email }}</small>
+        </td>
+
+        <td>{{ r.reason }}</td>
+
+        <td>
+            <span class="status-badge {{ r.status }}">
+                {{ r.status.title() }}
+            </span>
+        </td>
+
+        <td>
+            ${{ "%.2f"|format(r.total) }}
+        </td>
+
+        <td>
+
+            <form action="{{ url_for('update_refund_status', refund_id=r.id) }}"
+                  method="POST"
+                  class="refund-form">
+
+                <select name="status" class="refund-select">
+
+                    <option value="pending"
+                        {% if r.status == 'pending' %}selected{% endif %}>
+                        Pending
+                    </option>
+
+                    <option value="approved"
+                        {% if r.status == 'approved' %}selected{% endif %}>
+                        Approved
+                    </option>
+
+                    <option value="denied"
+                        {% if r.status == 'denied' %}selected{% endif %}>
+                        Denied
+                    </option>
+
+                </select>
+
+                <button type="submit" class="update-refund-btn">
+                    Update
+                </button>
+
+            </form>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% else %}
+
+<p class="no-orders">No refund requests yet.</p>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

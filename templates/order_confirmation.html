@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- 🌸 FLOWER CONFETTI CONTAINER -->
 <div id="flower-confetti"></div>
 
 <div style="
@@ -66,7 +65,6 @@
 
 </div>
 
-<!-- 🌸 FLOWER CONFETTI SCRIPT -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const confettiContainer = document.getElementById("flower-confetti");
@@ -101,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     animation: fall 4s linear infinite;
 }
 
-/* 🌸 Flower shape using Unicode blossom */
+
 .confetti-flower::before {
     content: "❀";
 }

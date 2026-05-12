@@ -5,8 +5,6 @@
 
     <h1 class="cs-title">Customer Service</h1>
     <p class="cs-subtitle">We're here to help you grow with confidence.</p>
-
-    <!-- CONTACT INFO -->
     <section class="cs-section">
         <h2>Contact Us</h2>
         <p>If you need assistance, feel free to reach out anytime.</p>
@@ -16,8 +14,6 @@
             <span class="cs-email">bloomyseeds@gmail.com</span>
         </div>
     </section>
-
-    <!-- FAQ SECTION -->
     <section class="cs-section">
         <h2>Frequently Asked Questions</h2>
 
@@ -28,7 +24,7 @@
 
         <div class="faq-item">
             <h3>Can I return or exchange an item?</h3>
-            <p>Yes! We accept returns within 14 days of delivery as long as the item is unused and in its original packaging.</p>
+            <p>Yes! We accept returns within 7 days of delivery as long as the item is unused and in its original packaging.</p>
         </div>
 
         <div class="faq-item">
@@ -43,17 +39,16 @@
 
         <div class="faq-item">
             <h3>How do I track my order?</h3>
-            <p>Once your order ships, you’ll receive an email with a tracking link.</p>
+            <p>Track your order progress and history through our order history link!</p>
         </div>
     </section>
 
 </div>
-<!-- 🌱 BLOOMYBOT FLOATING ICON -->
+
 <div id="bloomybot-icon">
     <img src="{{ url_for('static', filename='images/bloomybot.jpeg') }}" alt="BloomyBot">
 </div>
 
-<!-- 🌱 BLOOMYBOT SLIDE-OUT PANEL -->
 <div id="bloomybot-panel">
     <div class="bloomybot-header">
         <h3>BloomyBot</h3>
@@ -103,8 +98,6 @@
         color: #2d5a27;
         margin-bottom: 15px;
     }
-
-    /* ⭐ Shared card styling (FAQ + Contact box) */
     .faq-item,
     .cs-contact-box {
        background-color: oklab(94.96% 0.01258 -0.00455);
@@ -115,14 +108,12 @@
         border-left: 5px solid #2d5a27;
         font-family: "Autour One", system-ui;
 
-        /* ⭐ Hover animation */
         transition:
             transform 0.25s ease,
             box-shadow 0.25s ease,
             background-color 0.25s ease;
     }
 
-    /* ⭐ Hover pop-out effect */
     .faq-item:hover,
     .cs-contact-box:hover {
         transform: translateY(-4px) scale(1.03);
@@ -159,8 +150,6 @@
         font-weight: bold;
         font-family: "Autour One", system-ui;
     }
-
-    /* Footer styles (unchanged) */
     .lux-footer {
         margin-top: 60px;
         padding: 30px 20px;
@@ -193,8 +182,6 @@
         color: #4A3F35;
         font-weight: 500;
     }
-
-    /* 🌱 BLOOMYBOT ICON */
 #bloomybot-icon {
     position: fixed;
     left: 20px;
@@ -216,8 +203,6 @@
 #bloomybot-icon:hover {
     transform: scale(1.08);
 }
-
-/* 🌱 SLIDE-OUT PANEL */
 #bloomybot-panel {
     position: fixed;
     left: -350px;
@@ -234,8 +219,6 @@
     z-index: 99999;
     font-family: "Autour One", system-ui;
 }
-
-/* 🌱 HEADER */
 .bloomybot-header {
     background: #2d5a27;
     color: white;
@@ -249,8 +232,6 @@
     cursor: pointer;
     font-size: 22px;
 }
-
-/* 🌱 MESSAGES */
 #bloomybot-messages {
     flex: 1;
     padding: 10px;
@@ -274,8 +255,6 @@
     border-right: 4px solid #1b4d89;
     margin-left: auto;
 }
-
-/* 🌱 INPUT AREA */
 .bloomybot-input-area {
     display: flex;
     padding: 10px;
@@ -303,6 +282,10 @@
 
 
 <script>
+let refundMode = false;
+let refundOrderNumber = null;
+
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const icon = document.getElementById("bloomybot-icon");
@@ -312,47 +295,129 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("bloomybot-input");
     const messages = document.getElementById("bloomybot-messages");
 
-    // 🌱 OPEN PANEL
+
     icon.addEventListener("click", () => {
         panel.style.left = "0px";
     });
 
-    // 🌱 CLOSE PANEL
     closeBtn.addEventListener("click", () => {
         panel.style.left = "-350px";
     });
 
-    // 🌱 SEND MESSAGE FUNCTION (REAL BACKEND)
-    function sendMessage() {
-        const text = input.value.trim();
-        if (!text) return;
+function sendMessage() {
 
-        // Add user message to chat
-        messages.innerHTML += `<div class="user-msg">${text}</div>`;
-        input.value = "";
+    const text = input.value.trim();
+
+    if (!text) return;
+    messages.innerHTML += `
+        <div class="user-msg">${text}</div>
+    `;
+
+    input.value = "";
+
+    messages.scrollTop = messages.scrollHeight;
+
+    if (text.toLowerCase().includes("refund")) {
+
+        refundMode = true;
+
+        messages.innerHTML += `
+            <div class="bot-msg">
+                Please enter your order number for the refund request.
+            </div>
+        `;
+
         messages.scrollTop = messages.scrollHeight;
 
-        // 🌱 Send message to backend
-        fetch("/chatbot_api", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ message: text })
-        })
-        .then(res => res.json())
-        .then(data => {
-            messages.innerHTML += `<div class="bot-msg">${data.response}</div>`;
-            messages.scrollTop = messages.scrollHeight;
-        })
-        .catch(err => {
-            messages.innerHTML += `<div class="bot-msg">Oops! Something went wrong.</div>`;
-            messages.scrollTop = messages.scrollHeight;
-        });
+        return;
     }
 
-    // 🌱 BUTTON CLICK SEND
-    sendBtn.addEventListener("click", sendMessage);
+    if (refundMode && !refundOrderNumber) {
 
-    // 🌱 ENTER KEY SEND
+        refundOrderNumber = text;
+
+        fetch("/request_refund", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                order_number: refundOrderNumber,
+                reason: "Refund requested through BloomyBot"
+            })
+
+        })
+        .then(res => res.json())
+
+        .then(data => {
+
+            messages.innerHTML += `
+                <div class="bot-msg">
+                    ${data.message}
+                </div>
+            `;
+
+            messages.scrollTop = messages.scrollHeight;
+
+            refundMode = false;
+            refundOrderNumber = null;
+        })
+
+        .catch(err => {
+
+            messages.innerHTML += `
+                <div class="bot-msg">
+                    Something went wrong while submitting your refund request.
+                </div>
+            `;
+
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        return;
+    }
+
+    fetch("/chatbot_api", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            message: text
+        })
+
+    })
+    .then(res => res.json())
+
+    .then(data => {
+
+        messages.innerHTML += `
+            <div class="bot-msg">
+                ${data.response}
+            </div>
+        `;
+
+        messages.scrollTop = messages.scrollHeight;
+    })
+
+    .catch(err => {
+
+        messages.innerHTML += `
+            <div class="bot-msg">
+                Oops! Something went wrong.
+            </div>
+        `;
+
+        messages.scrollTop = messages.scrollHeight;
+    });
+}
+    sendBtn.addEventListener("click", sendMessage);
     input.addEventListener("keypress", (e) => {
         if (e.key === "Enter") sendMessage();
     });
